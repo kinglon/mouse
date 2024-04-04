@@ -27,4 +27,13 @@ private:
 
 	// 初始化所有的控件，只调用一次
 	void InitControls();
+
+	// 在触发控件右侧弹出按键菜单
+	void PopupKeyMenu(CControlUI* fromControl);
+
+private:
+	HMENU m_keyMenu = NULL;
+
+	// 触发按键菜单的按钮
+	CControlUI* m_clickedKeyBtn = nullptr;
 };

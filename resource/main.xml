@@ -30,37 +30,37 @@
                     <HorizontalLayout height="20" >
                         <Label text="1" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="leftKeyBtn" text="左键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="firstKeyBtn" text="左键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="2" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="rightKeyBtn" text="右键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="secondKeyBtn" text="右键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="3" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="middleKeyBtn" text="中键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="thirdKeyBtn" text="中键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="4" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="forwardKeyBtn" text="前进" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="fouthKeyBtn" text="前进" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="5" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="backwardKeyBtn" text="后退" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="fifthKeyBtn" text="后退" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="6" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="dpiKeyBtn" text="DPI循环" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="sixthKeyBtn" text="DPI切换" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
                     </HorizontalLayout>
                 </VerticalLayout>                
                 

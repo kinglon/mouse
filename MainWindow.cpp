@@ -15,11 +15,15 @@
 
 CMainWindow::CMainWindow()
 {
-	
+	m_keyMenu = LoadMenu(GetModuleHandle(NULL), MAKEINTRESOURCE(IDR_KEY_MENU));
 }
 
 CMainWindow::~CMainWindow()
 {
+	if (m_keyMenu)
+	{
+		DestroyMenu(m_keyMenu);
+	}
 }
 
 void CMainWindow::InitWindow()
@@ -193,6 +197,12 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	{
 		m_PaintManager.FindControl(L"matchPanel")->SetVisible(false);
 	}
+	else if (controlName == L"firstKeyBtn" || controlName == L"secondKeyBtn" || controlName == L"thirdKeyBtn" || \
+		controlName == L"fouthKeyBtn" || controlName == L"fifthKeyBtn" || controlName == L"sixthKeyBtn")
+	{
+		m_clickedKeyBtn = msg.pSender;
+		PopupKeyMenu(msg.pSender);
+	}
 }
 
 void CMainWindow::CloseRightSettingPannels()
@@ -247,4 +257,17 @@ void CMainWindow::InitControls()
 		pControl->SetText(lodOptionNames[i].c_str());
 		lodCombo->Add(pControl);
 	}
+}
+
+void CMainWindow::PopupKeyMenu(CControlUI* fromControl)
+{
+	if (m_keyMenu == NULL)
+	{
+		return;
+	}
+
+	RECT pos = fromControl->GetPos();
+	POINT pt = { pos.right, pos.top };
+	::ClientToScreen(GetHWND(), &pt);
+	TrackPopupMenu(GetSubMenu(m_keyMenu, 0), TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, pt.x, pt.y, 0, GetHWND(), NULL);
 }
