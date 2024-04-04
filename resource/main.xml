@@ -80,8 +80,8 @@
                 <VerticalLayout name="batteryPanel" height="81" inset="15,0,15,5" bkcolor="#ff1f1f1f">
                     <HorizontalLayout width="192" height="76" bkimage="file='battery.png'">
                         <!--Control name="batteryArea" padding="36,16,0,0" width="25" height="50" bkcolor="#ff1f1f1f" /-->
-                        <Control name="batteryArea" padding="36,16,0,0" width="25" height="1" bkcolor="#ff1f1f1f" />
-                        <Label name="batteryValue" padding="5,0,0,4" text="100%" textcolor="#fff0f0f0" width="40" align="center" valign="bottom" font="1"/>
+                        <Control name="batteryArea" padding="36,16,0,0" width="25" height="10" bkcolor="#ff1f1f1f" />
+                        <Label name="batteryValue" padding="5,0,0,4" text="80%" textcolor="#fff0f0f0" width="40" align="center" valign="bottom" font="1"/>
                     </HorizontalLayout>
                 </VerticalLayout>
                 <Control height="15" />
@@ -95,7 +95,7 @@
                 <HorizontalLayout name="powerPanel" height="70" inset="25,25,0,25" bkcolor="#ff1f1f1f">
                     <Label text="睡眠时间" textcolor="#fff0f0f0" width="70" align="right" font="1"/>
                     <Control width="7" />
-                    <Combo name="timeCombo" height="20" text="1" font="1" width="50" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" bkcolor="#ff484848" textcolor="#fff0f0f0" dropboxsize="0,170" itemtextpadding="10,0,0,0"/>
+                    <Combo name="timeCombo" height="20" font="1" width="50" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" bkcolor="#ff484848" textcolor="#fff0f0f0" dropboxsize="0,170" itemtextpadding="10,0,0,0"/>
                     <Control width="7" />
                     <Label text="分钟" textcolor="#fff0f0f0" width="40" align="left" font="1"/>
                 </HorizontalLayout>
@@ -132,7 +132,7 @@
                 <HorizontalLayout name="dpiPanel" height="195" inset="20,10,20,10" bkcolor="#ff1f1f1f" visible="false">
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn1" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn1" bkcolor="#ff454443" borderround="5,5" height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn1" bkcolor="#ffff0000" borderround="5,5" height="67"/>
@@ -146,7 +146,7 @@
                     <Control width="10" />
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn2" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn2" bkcolor="#ff454443" borderround="5,5"  height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn2" bkcolor="#ffff0000" borderround="5,5" height="67"/>
@@ -160,7 +160,7 @@
                     <Control width="10" />
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn3" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn3" bkcolor="#ff454443" borderround="5,5" height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn3" bkcolor="#ffff0000" borderround="5,5" height="67"/>
@@ -174,7 +174,7 @@
                     <Control width="10" />
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn4" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn4" bkcolor="#ff454443" borderround="5,5" height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn4" bkcolor="#ffff0000" borderround="5,5" height="67"/>
@@ -188,7 +188,7 @@
                     <Control width="10" />
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn5" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn5" bkcolor="#ff454443" borderround="5,5" height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn5" bkcolor="#ffff0000" borderround="5,5" height="67"/>
@@ -202,7 +202,7 @@
                     <Control width="10" />
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
-                            <Button name="dpiValueBtn6" bkcolor="#ff454443" borderround="5,5"/>
+                            <Button name="dpiValueBtn6" bkcolor="#ff454443" borderround="5,5" height="135"/>
                             <VerticalLayout>
                                 <Control />
                                 <Button name="dpiValueForgroundBtn6" bkcolor="#ffff0000" borderround="5,5" height="67"/>

@@ -11,6 +11,7 @@
 #include <shlwapi.h>
 #include <set>
 #include <fstream>
+#include "SettingManager.h"
 
 
 CMainWindow::CMainWindow()
@@ -80,8 +81,33 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		// 禁止双击放大窗口
 		return 0L;
 	}
+
+	if (uMsg == WM_COMMAND && HIWORD(wParam) == 0)
+	{
+		OnMenuCommand(LOWORD(wParam));
+		return 0L;
+	}
 		
 	return __super::HandleMessage(uMsg, wParam, lParam);
+}
+
+void CMainWindow::OnWindowInit(TNotifyUI& msg)
+{
+	UpdateControls();
+}
+
+void CMainWindow::OnMenuCommand(int commandId)
+{
+	std::wstring keyName = CKeyMapping::GetKeyNameByCommandId(commandId);
+	if (keyName.empty())
+	{
+		return;
+	}
+
+	if (m_clickedKeyBtn)
+	{
+		m_clickedKeyBtn->SetText(keyName.c_str());
+	}
 }
 
 void CMainWindow::OnClickEvent(TNotifyUI& msg)
@@ -112,6 +138,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"keyHeadBtn")
 	{
 		m_PaintManager.FindControl(L"keyPanel")->SetVisible(true);
+		UpdateKeyPanel();
 	}
 	else if (controlName == L"keyHideBtn")
 	{
@@ -128,6 +155,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"powerHeadBtn")
 	{
 		m_PaintManager.FindControl(L"powerPanel")->SetVisible(true);
+		UpdatePowerPannel();
 	}
 	else if (controlName == L"powerHideBtn")
 	{
@@ -136,6 +164,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"dpiHeadBtn")
 	{
 		m_PaintManager.FindControl(L"dpiPanel")->SetVisible(true);
+		UpdateDpiPanel();
 	}
 	else if (controlName == L"dpiHideBtn")
 	{
@@ -144,6 +173,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"lightHeadBtn")
 	{
 		m_PaintManager.FindControl(L"lightPanel")->SetVisible(true);
+		UpdateLightPanel();
 	}
 	else if (controlName == L"lightHideBtn")
 	{
@@ -152,6 +182,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"huiBaoHeadBtn")
 	{
 		m_PaintManager.FindControl(L"huiBaoPanel")->SetVisible(true);
+		UpdateHuibaoPanel();
 	}
 	else if (controlName == L"huiBaoHideBtn")
 	{
@@ -160,6 +191,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"lodHeadBtn")
 	{
 		m_PaintManager.FindControl(L"lodPanel")->SetVisible(true);
+		UpdateLodPanel();
 	}
 	else if (controlName == L"lodHideBtn")
 	{
@@ -168,6 +200,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"qudouHeadBtn")
 	{
 		m_PaintManager.FindControl(L"qudouPanel")->SetVisible(true);
+		UpdateQudouPanel();
 	}
 	else if (controlName == L"qudouHideBtn")
 	{
@@ -184,6 +217,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"sensorHeadBtn")
 	{
 		m_PaintManager.FindControl(L"sensorPanel")->SetVisible(true);
+		UpdateSensorPanel();
 	}
 	else if (controlName == L"sensorHideBtn")
 	{
@@ -202,6 +236,10 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	{
 		m_clickedKeyBtn = msg.pSender;
 		PopupKeyMenu(msg.pSender);
+	}
+	else if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
+	{
+		SetOption((COptionUI*)msg.pSender, ((COptionUI*)msg.pSender)->IsSelected());
 	}
 }
 
@@ -257,6 +295,183 @@ void CMainWindow::InitControls()
 		pControl->SetText(lodOptionNames[i].c_str());
 		lodCombo->Add(pControl);
 	}
+}
+
+void CMainWindow::UpdateKeyPanel()
+{
+	if (!m_PaintManager.FindControl(L"keyPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+	
+	std::wstring keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_firstKey);
+	m_PaintManager.FindControl(L"firstKeyBtn")->SetText(keyName.c_str());
+
+	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_secondKey);
+	m_PaintManager.FindControl(L"secondKeyBtn")->SetText(keyName.c_str());
+
+	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_thirdtKey);
+	m_PaintManager.FindControl(L"thirdKeyBtn")->SetText(keyName.c_str());
+
+	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fourthKey);
+	m_PaintManager.FindControl(L"fouthKeyBtn")->SetText(keyName.c_str());
+
+	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fifthKey);
+	m_PaintManager.FindControl(L"fifthKeyBtn")->SetText(keyName.c_str());
+
+	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_sixthKey);
+	m_PaintManager.FindControl(L"sixthKeyBtn")->SetText(keyName.c_str());
+}
+
+void CMainWindow::UpdatePowerPannel()
+{
+	if (!m_PaintManager.FindControl(L"powerPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	int selIndex = max(mouseConfig.m_sleepTime - 1, 0);
+	((CComboUI*)m_PaintManager.FindControl(L"timeCombo"))->SelectItem(selIndex);
+}
+
+void CMainWindow::UpdateDpiPanel()
+{
+	if (!m_PaintManager.FindControl(L"dpiPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	for (int i = 0; i < ARRAYSIZE(mouseConfig.m_dpiSetting); i++)
+	{
+		std::wstring controlName = std::wstring(L"dpiValueForgroundBtn") + std::to_wstring(i + 1);
+		CControlUI* dpiValueForgroundBtn = m_PaintManager.FindControl(controlName.c_str());
+		controlName = std::wstring(L"dpiValueBtn") + std::to_wstring(i + 1);
+		CControlUI* dpiValueBtn = m_PaintManager.FindControl(controlName.c_str());
+		controlName = std::wstring(L"dpiValueLabel") + std::to_wstring(i + 1);
+		CLabelUI* dpiValueLabel = (CLabelUI*)m_PaintManager.FindControl(controlName.c_str());
+		controlName = std::wstring(L"dpiColorBtn") + std::to_wstring(i + 1);
+		CControlUI* dpiColorBtn = m_PaintManager.FindControl(controlName.c_str());
+
+		int height = (int)((mouseConfig.m_dpiSetting[i].m_dpiLevel / 26000.0f)*dpiValueBtn->GetFixedHeight());
+		dpiValueForgroundBtn->SetFixedHeight(height);
+		dpiValueLabel->SetText(std::to_wstring(mouseConfig.m_dpiSetting[i].m_dpiLevel).c_str());
+		dpiColorBtn->SetBkColor(mouseConfig.m_dpiSetting[i].m_dpiColor);
+		if (mouseConfig.m_currentDpi == i)
+		{
+			dpiValueLabel->SetTextColor(0xffff0000);
+		}
+		else
+		{
+			dpiValueLabel->SetTextColor(0xfff0f0f0);
+		}
+	}
+}
+
+void CMainWindow::UpdateLightPanel()
+{
+	if (!m_PaintManager.FindControl(L"lightPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	int selIndex = max(mouseConfig.m_lightIndex, 0);
+	((CComboUI*)m_PaintManager.FindControl(L"lightCombo"))->SelectItem(selIndex);
+}
+
+void CMainWindow::UpdateHuibaoPanel()
+{
+	if (!m_PaintManager.FindControl(L"huiBaoPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	int selIndex = max(mouseConfig.m_huibaorate, 0);
+	((CComboUI*)m_PaintManager.FindControl(L"huiBaoCombo"))->SelectItem(selIndex);
+}
+
+void CMainWindow::UpdateLodPanel()
+{
+	if (!m_PaintManager.FindControl(L"lodPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	int selIndex = max(mouseConfig.m_lodIndex - 1, 0);
+	((CComboUI*)m_PaintManager.FindControl(L"lodCombo"))->SelectItem(selIndex);
+}
+
+void CMainWindow::UpdateQudouPanel()
+{
+	if (!m_PaintManager.FindControl(L"qudouPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	int qudouTime = max(mouseConfig.m_qudouTime, 1);
+	qudouTime = min(qudouTime, 30);
+	((CEditUI*)m_PaintManager.FindControl(L"qudouTimeEdit"))->SetText(std::to_wstring(qudouTime).c_str());
+}
+
+void CMainWindow::UpdateSensorPanel()
+{
+	if (!m_PaintManager.FindControl(L"sensorPanel")->IsVisible())
+	{
+		return;
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+
+	SetOption((COptionUI*)m_PaintManager.FindControl(L"lineRejustOption"), mouseConfig.m_lineRejust);
+	SetOption((COptionUI*)m_PaintManager.FindControl(L"motionSyncOption"), mouseConfig.m_motionSync);
+	SetOption((COptionUI*)m_PaintManager.FindControl(L"rippleControlOption"), mouseConfig.m_rippleControl);
+}
+
+void CMainWindow::UpdateControls()
+{
+	// 更新按键名称
+	UpdateKeyPanel();
+
+	// 睡眠时间
+	UpdatePowerPannel();
+	
+
+	// DPI设置
+	UpdateDpiPanel();
+
+	// 灯光效果
+	UpdateLightPanel();
+
+	// 回报率设置
+	UpdateHuibaoPanel();
+
+	// LOD高度
+	UpdateLodPanel();
+
+	// 按键去抖时间
+	UpdateQudouPanel();
+
+	// Sensor高阶设定
+	UpdateSensorPanel();
+}
+
+void CMainWindow::SetOption(COptionUI* control, bool check)
+{
+	control->Selected(check);
+	control->SetBkImage(check ? L"option_check.png" : L"option_uncheck.png");
 }
 
 void CMainWindow::PopupKeyMenu(CControlUI* fromControl)

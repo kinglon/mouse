@@ -4,6 +4,7 @@
 #include "LogUtil.h"
 #include "DumpUtil.h"
 #include "ImPath.h"
+#include "SettingManager.h"
 
 using namespace std;
 
@@ -34,6 +35,13 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	g_dllLog = CLogUtil::GetLog(L"mouse");
+
+	//初始化崩溃转储机制
+	CDumpUtil::SetDumpFilePath(CImPath::GetDumpPath().c_str());
+	CDumpUtil::Enable(true);
+
+	int nLogLevel = CSettingManager::GetInstance()->m_logLevel;
+	g_dllLog->SetLogLevel((ELogLevel)nLogLevel);
 
 	_SetProcessDPIAware();
 
