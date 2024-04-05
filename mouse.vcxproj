@@ -92,6 +92,8 @@
     <ClInclude Include="KeyMapping.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="mouse.h" />
+    <ClInclude Include="MouseCommManager.h" />
+    <ClInclude Include="ProtocalUtil.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SettingManager.h" />
     <ClInclude Include="stdafx.h" />
@@ -108,6 +110,8 @@
     <ClCompile Include="KeyMapping.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="mouse.cpp" />
+    <ClCompile Include="MouseCommManager.cpp" />
+    <ClCompile Include="ProtocalUtil.cpp" />
     <ClCompile Include="SettingManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

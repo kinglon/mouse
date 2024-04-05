@@ -34,6 +34,15 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	// 单实例
+	const wchar_t* mutexName = L"{4ED33E4A-D69A-4D0A-8523-158D74420098}";
+	HANDLE mutexHandle = CreateMutexW(nullptr, TRUE, mutexName);
+	if (mutexHandle == nullptr || GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		MessageBox(NULL, L"程序已经在运行", L"提示", MB_OK);
+		return 0;
+	}
+
 	g_dllLog = CLogUtil::GetLog(L"mouse");
 
 	//初始化崩溃转储机制

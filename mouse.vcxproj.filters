@@ -66,6 +66,12 @@
     <ClInclude Include="KeyMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProtocalUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseCommManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -99,6 +105,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyMapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocalUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseCommManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
