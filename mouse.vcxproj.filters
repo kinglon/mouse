@@ -78,6 +78,9 @@
     <ClInclude Include="ResourceUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyMessageBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourceUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyMessageBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

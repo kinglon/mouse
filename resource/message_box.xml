@@ -9,13 +9,17 @@
         <HorizontalLayout height="30" bkcolor="#ffbb220a">            
         </HorizontalLayout>
         
-        <!--进度条-->
-        <Control />
-        <HorizontalLayout height="6" >
+        <VerticalLayout inset="20,20,20,20">
+            <!--消息内容-->
+            <Label name="textLabel" text="" textcolor="#fff0f0f0" align="center" valign="center" />
+            
             <Control />
-            <Progress name="progress" width="330" bkcolor="#ffffffff" foreimage="file='progress_foreimage.png'" max="3" value="0"/>
-            <Control />
-        </HorizontalLayout>
-        <Control />
+            
+            <!--确定按钮-->
+            <HorizontalLayout>
+                <Control />
+                <Button name="okBtn" text="确定" width = "120" textcolor="#fff0f0f0" bkcolor="#ff484848" height="30" />
+            </HorizontalLayout>
+        </VerticalLayout>
     </VerticalLayout>    
 </Window>

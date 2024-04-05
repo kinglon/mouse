@@ -21,6 +21,7 @@ void CWaitingWindow::InitWindow()
 
 	CProgressUI* progress = (CProgressUI*)m_PaintManager.FindControl(L"progress");
 	progress->SetMaxValue(m_waitSeconds);
+	progress->SetValue(0);
 	SetTimer(GetHWND(), TIMERID, 1000, NULL);
 }
 
@@ -41,7 +42,7 @@ CDuiString CWaitingWindow::GetSkinFile()
 
 LPCTSTR CWaitingWindow::GetWindowClassName(void) const
 {
-	return L"waitingwindow";
+	return L"MouseWaitingWindow";
 }
 
 LRESULT CWaitingWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -13,6 +13,7 @@
 #include <fstream>
 #include "SettingManager.h"
 #include "ResourceUtil.h"
+#include "MyMessageBox.h"
 
 // 设置分类
 #define SETTING_CATEGORY_ALL		0		//所有
@@ -27,6 +28,9 @@
 
 
 #define WM_MOUSE_DATA_ARRIVE	WM_USER+100
+
+// selectitem事件处理函数内不能ShowModal()，于是异步发送一个新消息
+#define WM_SELECT_ITEM			WM_USER+101
 
 #define CURRENT_DPI_TEXT_COLOR	0xffff0000
 
@@ -95,6 +99,18 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		delete[] data;
 		return 0L;
 	}
+
+	if (uMsg == WM_SELECT_ITEM)
+	{
+		CControlUI* control = (CControlUI*)lParam;
+		if (control->GetName() == L"timeCombo")
+		{
+			int sleepTime = _wtoi(control->GetText().GetData());
+			SetSleepTime(sleepTime);
+		}
+
+		return 0L;
+	}
 		
 	return __super::HandleMessage(uMsg, wParam, lParam);
 }
@@ -112,12 +128,12 @@ void CMainWindow::RecvDataCallback(unsigned char* data, int dataLength)
 
 void CMainWindow::OnItemSelectEvent(TNotifyUI& msg)
 {
-	std::wstring controlName = msg.pSender->GetName();
-	if (controlName == L"timeCombo")
+	if (!m_manualTrigger)
 	{
-		int sleepTime = _wtoi(msg.pSender->GetText().GetData());
-		SetSleepTime(sleepTime);
+		return;
 	}
+
+	PostMessage(WM_SELECT_ITEM, 0, (LPARAM)msg.pSender);
 }
 
 void CMainWindow::OnWindowInit(TNotifyUI& msg)
@@ -386,8 +402,10 @@ void CMainWindow::UpdatePowerPannel()
 
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 
+	m_manualTrigger = false;
 	int selIndex = max(mouseConfig.m_sleepTime - 1, 0);
 	((CComboUI*)m_PaintManager.FindControl(L"timeCombo"))->SelectItem(selIndex);
+	m_manualTrigger = true;
 }
 
 void CMainWindow::UpdateDpiPanel()
@@ -434,8 +452,10 @@ void CMainWindow::UpdateLightPanel()
 
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 
+	m_manualTrigger = false;
 	int selIndex = max(mouseConfig.m_lightIndex, 0);
 	((CComboUI*)m_PaintManager.FindControl(L"lightCombo"))->SelectItem(selIndex);
+	m_manualTrigger = true;
 }
 
 void CMainWindow::UpdateHuibaoPanel()
@@ -447,8 +467,10 @@ void CMainWindow::UpdateHuibaoPanel()
 
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 
+	m_manualTrigger = false;
 	int selIndex = max(mouseConfig.m_huibaorate, 0);
 	((CComboUI*)m_PaintManager.FindControl(L"huiBaoCombo"))->SelectItem(selIndex);
+	m_manualTrigger = true;
 }
 
 void CMainWindow::UpdateLodPanel()
@@ -460,8 +482,10 @@ void CMainWindow::UpdateLodPanel()
 
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 
+	m_manualTrigger = false;
 	int selIndex = max(mouseConfig.m_lodIndex - 1, 0);
 	((CComboUI*)m_PaintManager.FindControl(L"lodCombo"))->SelectItem(selIndex);
+	m_manualTrigger = true;
 }
 
 void CMainWindow::UpdateQudouPanel()
@@ -631,6 +655,15 @@ void CMainWindow::SaveSetting(int settingCategory)
 	CSettingManager::GetInstance()->SaveMouseConfig();
 }
 
+void CMainWindow::MyMessageBox(std::wstring text)
+{
+	CMyMessageBox messageBox;
+	messageBox.SetText(text); 
+	messageBox.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+	messageBox.CenterWindow();
+	messageBox.ShowModal();
+}
+
 void CMainWindow::UpdateControls(int settingCategory)
 {
 	// 按键
@@ -692,14 +725,14 @@ void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& packa
 {
 	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
 	{
-		MessageBox(GetHWND(), L"鼠标未连接", L"提示", MB_OK);
+		MyMessageBox(L"鼠标未连接");
 		UpdateControls(settingCategory);
 		return;
 	}
 
 	if (!CProtocalUtil::SendPackage(package))
 	{
-		MessageBox(GetHWND(), L"发送设置给鼠标失败", L"提示", MB_OK);
+		MyMessageBox(L"发送设置给鼠标失败");
 		UpdateControls(settingCategory);
 		return;
 	}
@@ -717,7 +750,7 @@ void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& packa
 	// 设置成功就更新配置，设置失败恢复界面
 	if (!success)
 	{
-		MessageBox(GetHWND(), L"设置失败", L"提示", MB_OK);
+		MyMessageBox(L"设置失败");
 		UpdateControls(settingCategory);
 	}
 	else

@@ -57,6 +57,9 @@ private:
 	// 从界面获取数据保存到设置文件
 	void SaveSetting(int settingCategory);
 
+	// 消息提示
+	void MyMessageBox(std::wstring text);
+
 private:
 	// 使用配置更新控件
 	void UpdateControls(int settingCategory);
@@ -81,4 +84,7 @@ private:
 
 	// 等待窗口
 	CWaitingWindow* m_waitingWindow = nullptr;
+
+	// 标识是否手动触发
+	bool m_manualTrigger = true;
 };
