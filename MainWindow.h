@@ -1,6 +1,10 @@
 #pragma once
 
-class CMainWindow : public WindowImplBase
+#include "ProtocalUtil.h"
+#include "MouseCommManager.h"
+#include "WaitingWindow.h"
+
+class CMainWindow : public WindowImplBase, public IMouseCommCallback
 {
 public:
 	CMainWindow();
@@ -9,6 +13,7 @@ public:
 public:
 	UIBEGIN_MSG_MAP
 		EVENT_HANDLER(DUI_MSGTYPE_CLICK, OnClickEvent)
+		EVENT_HANDLER(DUI_MSGTYPE_ITEMSELECT, OnItemSelectEvent)
 		EVENT_ID_HANDLER(DUI_MSGTYPE_WINDOWINIT, L"root", OnWindowInit)
 	UIEND_MSG_MAP
 
@@ -20,11 +25,16 @@ protected: //override base
 	virtual LPCTSTR GetWindowClassName(void) const override;
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;	
 
+protected: // implement IMouseCommCallback
+	virtual void RecvDataCallback(unsigned char* data, int dataLength) override;
+
 private:
 	void OnClickEvent(TNotifyUI& msg);
-
-	// 窗口已经完成初始化，控件大小都已经确定
+	void OnItemSelectEvent(TNotifyUI& msg);
 	void OnWindowInit(TNotifyUI& msg);
+
+	// 接收到鼠标的数据
+	void OnMouseDataArrive(const unsigned char* data, int dataLength);
 
 	// 通过菜单触发的命令
 	void OnMenuCommand(int commandId);
@@ -41,9 +51,15 @@ private:
 	// 设置Option控件Check状态
 	void SetOption(COptionUI* control, bool check);
 
+	// 发送设置给鼠标
+	void SendSetting(int settingCategory, const CProtocalPackage& package);
+
+	// 从界面获取数据保存到设置文件
+	void SaveSetting(int settingCategory);
+
 private:
 	// 使用配置更新控件
-	void UpdateControls();
+	void UpdateControls(int settingCategory);
 
 	void UpdateKeyPanel();
 	void UpdatePowerPannel();
@@ -55,8 +71,14 @@ private:
 	void UpdateSensorPanel();
 
 private:
+	void SetSleepTime(int sleepTime);
+
+private:
 	HMENU m_keyMenu = NULL;
 
 	// 触发按键菜单的按钮
 	CControlUI* m_clickedKeyBtn = nullptr;
+
+	// 等待窗口
+	CWaitingWindow* m_waitingWindow = nullptr;
 };

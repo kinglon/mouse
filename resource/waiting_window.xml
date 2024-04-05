@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window caption="0,0,0,30" mininfo="540,170">
+    <Font id="1" name="微软雅黑" size="12" bold="false"  />
+    <Font id="2" name="微软雅黑" size="14" bold="false" default="true" />
+    <Font id="3" name="微软雅黑" size="10" bold="false" />   
+    
+ 
+    <VerticalLayout name="root" bkcolor="#ff272525" bordercolor="#ffbb220a" bordersize="1">
+        <!--标题栏-->
+        <HorizontalLayout height="30" bkcolor="#ffbb220a">            
+        </HorizontalLayout>
+        
+        <!--进度条-->
+        <Control />
+        <HorizontalLayout height="6" >
+            <Control />
+            <Progress name="progress" width="330" bkcolor="#ffffffff" foreimage="file='progress_foreimage.png'" max="100" value="50"/>
+            <Control />
+        </HorizontalLayout>
+        <Control />
+    </VerticalLayout>    
+</Window>

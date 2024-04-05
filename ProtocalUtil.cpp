@@ -8,7 +8,7 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	return true;
 }
 
-bool CProtocalUtil::ParsePackage(unsigned char* data, int dataLength, CProtocalPackage& package)
+bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package)
 {
 	// todo by yejinlong, 解析数据包
 	return true;

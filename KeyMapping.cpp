@@ -92,3 +92,17 @@ std::wstring CKeyMapping::GetKeyNameByCommandId(int commandId)
 
 	return L"";
 }
+
+int CKeyMapping::GetKeyIndexByName(std::wstring name)
+{
+	std::vector<CKeyItem>& keys = GetKeys();
+	for (auto& key : keys)
+	{
+		if (name == key.m_keyName)
+		{
+			return key.m_keyIndex;
+		}
+	}
+
+	return -1;
+}

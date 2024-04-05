@@ -22,7 +22,7 @@ class CProtocalPackage
 {
 public:
 	// Report ID
-	unsigned char m_reportId = 0x00;
+	unsigned char m_reportId = 0xa5;
 
 	// 命令
 	unsigned char m_commandId = 0x00;
@@ -43,6 +43,6 @@ public:
 	static bool SendPackage(const CProtocalPackage& package);
 
 	// 解析数据包
-	static bool ParsePackage(unsigned char* data, int dataLength, CProtocalPackage& package);
+	static bool ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package);
 };
 

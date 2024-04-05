@@ -129,13 +129,13 @@ public:
 
 public:
 	// 保存所有配置
-	void Save();
+	void Save(bool needSaveMouseConfig);
 
 	// 加载鼠标配置
 	void LoadMouseConfig(const std::wstring& configName);
 
-	// 保存鼠标配置
-	void SaveMouseConfig(const std::wstring& configName);
+	// 保存鼠标配置，未指定配置名称表示保存到当前的配置
+	void SaveMouseConfig(const std::wstring& configName = L"");
 
 private:
 	void Load();

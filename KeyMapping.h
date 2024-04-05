@@ -88,5 +88,8 @@ public:
 
 	// 根据命令ID获取key名称
 	static std::wstring GetKeyNameByCommandId(int commandId);
+
+	// 根据key名称获取Key索引，找不到返回-1
+	static int GetKeyIndexByName(std::wstring name);
 };
 

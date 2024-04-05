@@ -72,6 +72,12 @@
     <ClInclude Include="MouseCommManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WaitingWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -111,6 +117,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MouseCommManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WaitingWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

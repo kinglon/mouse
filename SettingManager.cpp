@@ -184,6 +184,10 @@ void CSettingManager::LoadMouseConfig(const std::wstring& configName)
 	{
 		m_mouseConfig.m_rippleControl = root["rippleControl"].asBool();
 	}
+
+	// 更新当前加载的配置名称
+	m_currentMouseConfig = configName;
+	Save(false);
 }
 
 void CSettingManager::SaveMouseConfig(const std::wstring& configName)
@@ -214,7 +218,12 @@ void CSettingManager::SaveMouseConfig(const std::wstring& configName)
 	root["motionSync"] = m_mouseConfig.m_motionSync;
 	root["rippleControl"] = m_mouseConfig.m_rippleControl;
 
-	std::wstring strConfFilePath = CImPath::GetConfPath() + L"mouse\\" + configName + L".json";
+	std::wstring saveConfName = configName;
+	if (saveConfName.empty())
+	{
+		saveConfName = m_currentMouseConfig;
+	}
+	std::wstring strConfFilePath = CImPath::GetConfPath() + L"mouse\\" + saveConfName + L".json";
 	std::ofstream outputFile(strConfFilePath);
 	if (outputFile.is_open())
 	{
@@ -229,9 +238,12 @@ void CSettingManager::SaveMouseConfig(const std::wstring& configName)
 	}
 }
 
-void CSettingManager::Save()
+void CSettingManager::Save(bool needSaveMouseConfig)
 {
-	SaveMouseConfig(m_currentMouseConfig);
+	if (needSaveMouseConfig)
+	{
+		SaveMouseConfig(m_currentMouseConfig);
+	}
 
     Json::Value root = Json::objectValue;
 	root["log_level"] = m_logLevel;
