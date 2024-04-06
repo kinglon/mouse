@@ -133,13 +133,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn1" bkcolor="#ff454443" borderround="5,5" height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn1" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container>
                         <Control height="5"/>
-                        <Label name="dpiValueLabel1" text="800" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel1" text="800" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn1" bkcolor="#ffff0000" height="15" />
                     </VerticalLayout>
@@ -147,13 +147,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn2" bkcolor="#ff454443" borderround="5,5"  height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn2" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container>                        
                         <Control height="5"/>
-                        <Label name="dpiValueLabel2" text="1600" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel2" text="1600" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn2" bkcolor="#ff00ff00" height="15" />
                     </VerticalLayout>
@@ -161,13 +161,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn3" bkcolor="#ff454443" borderround="5,5" height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn3" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container>                        
                         <Control height="5"/>
-                        <Label name="dpiValueLabel3" text="2400" height="15" bordercolor="#ffa8a8a8" textcolor="#ffff0000" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel3" text="2400" height="15" bordercolor="#ffa8a8a8" textcolor="#ffff0000" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn3" bkcolor="#ff0000ff" height="15" />
                     </VerticalLayout>
@@ -175,13 +175,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn4" bkcolor="#ff454443" borderround="5,5" height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn4" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container>  
                         <Control height="5"/>
-                        <Label name="dpiValueLabel4" text="3200" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel4" text="3200" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn4" bkcolor="#ffffff00" height="15" />
                     </VerticalLayout>
@@ -189,13 +189,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn5" bkcolor="#ff454443" borderround="5,5" height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn5" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container> 
                         <Control height="5"/>
-                        <Label name="dpiValueLabel5" text="5000" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel5" text="5000" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn5" bkcolor="#ff00ffff" height="15" />
                     </VerticalLayout>
@@ -203,13 +203,13 @@
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
                             <Button name="dpiValueBtn6" bkcolor="#ff454443" borderround="5,5" height="135"/>
-                            <VerticalLayout>
-                                <Control />
+                            <VerticalLayout mouse="false">
+                                <Control mouse="false" />
                                 <Button name="dpiValueForgroundBtn6" bkcolor="#ffff0000" borderround="5,5" height="67"/>
                             </VerticalLayout>
                         </Container>
                         <Control height="5"/>
-                        <Label name="dpiValueLabel6" text="26000" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
+                        <Button name="dpiValueLabel6" text="26000" height="15" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" bordersize="1" align="center" font="3"/>
                         <Control />
                         <Button name="dpiColorBtn6" bkcolor="#ffff00ff" height="15" />
                     </VerticalLayout>

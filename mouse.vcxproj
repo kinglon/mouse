@@ -89,6 +89,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DpiLockWindow.h" />
     <ClInclude Include="KeyMapping.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="mouse.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="WaitingWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DpiLockWindow.cpp" />
     <ClCompile Include="KeyMapping.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="mouse.cpp" />

@@ -14,6 +14,7 @@
 #include "SettingManager.h"
 #include "ResourceUtil.h"
 #include "MyMessageBox.h"
+#include "DpiLockWindow.h"
 
 // 设置分类
 #define SETTING_CATEGORY_ALL		0		//所有
@@ -105,8 +106,19 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		CControlUI* control = (CControlUI*)lParam;
 		if (control->GetName() == L"timeCombo")
 		{
-			int sleepTime = _wtoi(control->GetText().GetData());
-			SetSleepTime(sleepTime);
+			SetSleepTimeToMouse();
+		}
+		else if (control->GetName() == L"lightCombo")
+		{
+			SetLightSettingToMouse();
+		}
+		else if (control->GetName() == L"huiBaoCombo")
+		{
+			SetHuibaoSettingToMouse();
+		}
+		else if (control->GetName() == L"lodCombo")
+		{
+			SetLodSettingToMouse();
 		}
 
 		return 0L;
@@ -134,6 +146,15 @@ void CMainWindow::OnItemSelectEvent(TNotifyUI& msg)
 	}
 
 	PostMessage(WM_SELECT_ITEM, 0, (LPARAM)msg.pSender);
+}
+
+void CMainWindow::OnSelectChangeEvent(TNotifyUI& msg)
+{
+	std::wstring controlName = msg.pSender->GetName();
+	if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
+	{
+		SetSensorSettingToMouse();
+	}
 }
 
 void CMainWindow::OnWindowInit(TNotifyUI& msg)
@@ -166,15 +187,55 @@ void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 
 void CMainWindow::OnMenuCommand(int commandId)
 {
+	if (m_clickedKeyBtn == nullptr)
+	{
+		return;
+	}
+
+	// DPI锁定，弹窗设置DPI值
+	int dpiValue = 200;
+	if (commandId == ID_KEY_DPILOCK)
+	{
+		CDpiLockWindow dpiLockWindow;
+		dpiLockWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+		dpiLockWindow.CenterWindow();
+		if (dpiLockWindow.ShowModal() == 0) // 取消
+		{
+			return;
+		}
+		dpiValue = dpiLockWindow.GetDpiValue();
+	}
+
+	// 获取KeyNum
 	std::wstring keyName = CKeyMapping::GetKeyNameByCommandId(commandId);
 	if (keyName.empty())
 	{
 		return;
 	}
-
-	if (m_clickedKeyBtn)
+	static std::wstring keyBtnNames[] = { L"firstKeyBtn", L"secondKeyBtn", L"thirdKeyBtn", L"fouthKeyBtn", L"fifthKeyBtn", L"sixthKeyBtn" };
+	int keyNum = -1;
+	for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
 	{
-		m_clickedKeyBtn->SetText(keyName.c_str());
+		if (m_clickedKeyBtn->GetName() == keyBtnNames[i].c_str())
+		{
+			keyNum = i + 1;
+		}
+	}
+	if (keyNum < 1)
+	{
+		return;
+	}
+
+	// 更改按键名称	
+	m_clickedKeyBtn->SetText(keyName.c_str());
+
+	// 发送按键配置给鼠标
+	if (commandId == ID_KEY_DPILOCK)
+	{
+		SetDpiLockToMouse(keyNum, dpiValue);
+	}
+	else{
+		SetKeyToMouse(keyNum, CKeyMapping::GetKeyIndexByName(keyName));
 	}
 }
 
@@ -309,6 +370,34 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	{
 		SetOption((COptionUI*)msg.pSender, ((COptionUI*)msg.pSender)->IsSelected());
 	}
+	else if (controlName.Find(L"dpiColorBtn") == 0)
+	{
+		ClickDpiColorBtn((CButtonUI*)msg.pSender);
+	}
+	else if (controlName.Find(L"dpiValueBtn") == 0 || controlName.Find(L"dpiValueForgroundBtn") == 0)
+	{
+		ClickDpiValueBtn((CButtonUI*)msg.pSender);
+	}
+	else if (controlName.Find(L"dpiValueLabel") == 0)
+	{
+		SwitchCurrentDpi((CButtonUI*)msg.pSender);
+	}
+	else if (controlName == L"qudouBtn")
+	{
+		OnQudouBtnClicked();
+	}
+	else if (controlName == L"matchBtn")
+	{
+		OnMatchBtnClicked();
+	}
+	else if (controlName == L"resetBtn")
+	{
+		OnResetBtnClicked();
+	}
+	else if (controlName == L"systemSettingBtn")
+	{
+		OnSystemMouseBtnClicked();
+	}
 }
 
 void CMainWindow::CloseRightSettingPannels()
@@ -424,7 +513,7 @@ void CMainWindow::UpdateDpiPanel()
 		controlName = std::wstring(L"dpiValueBtn") + std::to_wstring(i + 1);
 		CControlUI* dpiValueBtn = m_PaintManager.FindControl(controlName.c_str());
 		controlName = std::wstring(L"dpiValueLabel") + std::to_wstring(i + 1);
-		CLabelUI* dpiValueLabel = (CLabelUI*)m_PaintManager.FindControl(controlName.c_str());
+		CButtonUI* dpiValueLabel = (CButtonUI*)m_PaintManager.FindControl(controlName.c_str());
 		controlName = std::wstring(L"dpiColorBtn") + std::to_wstring(i + 1);
 		CControlUI* dpiColorBtn = m_PaintManager.FindControl(controlName.c_str());
 
@@ -516,8 +605,126 @@ void CMainWindow::UpdateSensorPanel()
 	SetOption((COptionUI*)m_PaintManager.FindControl(L"rippleControlOption"), mouseConfig.m_rippleControl);
 }
 
-void CMainWindow::SetSleepTime(int sleepTime)
+int CMainWindow::GetDpiIndexByControlName(std::wstring controlName)
 {
+	if (controlName.empty())
+	{
+		return -1;
+	}
+
+	int firstNumberIndex = -1;
+	for (unsigned int i = controlName.size() - 1; i >= 0; i--)
+	{
+		if (controlName[i] < L'0' || controlName[i] > L'9')
+		{
+			break;
+		}
+		firstNumberIndex = i;
+	}
+	if (firstNumberIndex == -1)
+	{
+		return -1;
+	}
+
+	std::wstring number = controlName.substr(firstNumberIndex);
+	return _wtoi(number.c_str());
+}
+
+void CMainWindow::ClickDpiColorBtn(CButtonUI* button)
+{
+	// 选择颜色
+	static COLORREF acrCustClr[16];
+	CHOOSECOLOR cc;
+	ZeroMemory(&cc, sizeof(cc));
+	cc.lStructSize = sizeof(cc);
+	cc.hwndOwner = GetHWND();
+	cc.lpCustColors = (LPDWORD)acrCustClr;
+	cc.lpfnHook = (LPCCHOOKPROC)&CMainWindow::ColorDialogProc;
+	cc.Flags = CC_FULLOPEN | CC_ENABLEHOOK;
+	if (!ChooseColor(&cc))
+	{
+		return;
+	}
+	DWORD color = 0XFF000000 | (GetRValue(cc.rgbResult)<<16) | (GetGValue(cc.rgbResult)<<8) | (GetBValue(cc.rgbResult));
+	button->SetBkColor(color);
+
+	// 更新配置给鼠标
+	SetDpiSettingToMouse();
+}
+
+void CMainWindow::ClickDpiValueBtn(CButtonUI* button)
+{
+	// 获取DPI值
+	int dpiValue = 200;
+	CDpiLockWindow dpiLockWindow;
+	dpiLockWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+	dpiLockWindow.CenterWindow();
+	if (dpiLockWindow.ShowModal() == 0) // 取消
+	{
+		return;
+	}
+	dpiValue = dpiLockWindow.GetDpiValue();
+
+	// 获取DPI索引
+	int dpiIndex = GetDpiIndexByControlName(button->GetName().GetData());
+	if (dpiIndex < 1 || dpiIndex > 6)
+	{
+		return;
+	}
+
+	// 更新界面
+	CControlUI* dpiValueLabel = m_PaintManager.FindControl((std::wstring(L"dpiValueLabel") + std::to_wstring(dpiIndex)).c_str());
+	dpiValueLabel->SetText(std::to_wstring(dpiValue).c_str());
+
+	CControlUI* dpiValueBtn = m_PaintManager.FindControl((std::wstring(L"dpiValueBtn") + std::to_wstring(dpiIndex)).c_str());
+	CControlUI* dpiValueForgroundBtn = m_PaintManager.FindControl((std::wstring(L"dpiValueForgroundBtn") + std::to_wstring(dpiIndex)).c_str());
+	int height = (int)((dpiValue / 26000.0f)*dpiValueBtn->GetFixedHeight());
+	dpiValueForgroundBtn->SetFixedHeight(height);
+
+	// 更新配置给鼠标
+	SetDpiSettingToMouse();
+}
+
+void CMainWindow::SwitchCurrentDpi(CButtonUI* button)
+{
+	// 更改当前DPI的字体颜色
+	for (int i = 1; i <= 6; i++)
+	{
+		CButtonUI* btn = (CButtonUI*)m_PaintManager.FindControl((std::wstring(L"dpiValueLabel")+std::to_wstring(i)).c_str());
+		if (btn == button)
+		{
+			btn->SetTextColor(CURRENT_DPI_TEXT_COLOR);
+		}
+		else
+		{
+			btn->SetTextColor(0xfff0f0f0);
+		}
+	}
+
+	// 更新配置给鼠标
+	SetDpiSettingToMouse();
+}
+
+void CMainWindow::SetDpiLockToMouse(int keyNum, int dpiValue)
+{
+	CProtocalTLV tlv;
+	tlv.m_type = 0x4a;
+	tlv.m_length = 0x05;
+	tlv.m_value[0] = (unsigned char)keyNum;
+	tlv.m_value[1] = dpiValue & 0xff;
+	tlv.m_value[2] = (dpiValue >> 8) & 0xff;
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_KEY, package);
+}
+
+void CMainWindow::SetSleepTimeToMouse()
+{
+	int sleepTime = _wtoi(m_PaintManager.FindControl(L"timeCombo")->GetText().GetData());
+
 	CProtocalTLV tlv;
 	tlv.m_type = 0x46;
 	tlv.m_length = 0x03;
@@ -528,6 +735,368 @@ void CMainWindow::SetSleepTime(int sleepTime)
 	package.m_tlvs.push_back(tlv);
 	
 	SendSetting(SETTING_CATEGORY_POWER, package);
+}
+
+void CMainWindow::SetLightSettingToMouse()
+{
+	int curSel = ((CComboUI*)m_PaintManager.FindControl(L"lightCombo"))->GetCurSel();
+
+	CProtocalTLV tlv;
+	tlv.m_type = 0x48;
+	tlv.m_length = 0x05;
+	tlv.m_value[0] = (unsigned char)curSel;
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_LIGHT, package);
+}
+
+void CMainWindow::SetLodSettingToMouse()
+{
+	int curSel = ((CComboUI*)m_PaintManager.FindControl(L"lodCombo"))->GetCurSel();
+
+	CProtocalTLV tlv;
+	tlv.m_type = 0x43;
+	tlv.m_length = 0x03;
+	tlv.m_value[0] = (unsigned char)(curSel+1);
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_LOD, package);
+}
+
+void CMainWindow::SetSensorSettingToMouse()
+{
+	bool lineRejust = ((COptionUI*)m_PaintManager.FindControl(L"lineRejustOption"))->IsSelected();
+	bool motionSync = ((COptionUI*)m_PaintManager.FindControl(L"motionSyncOption"))->IsSelected();
+	bool rippleControl = ((COptionUI*)m_PaintManager.FindControl(L"rippleControlOption"))->IsSelected();
+
+	CProtocalTLV tlv;
+	tlv.m_type = 0x47;
+	tlv.m_length = 0x05;
+	tlv.m_value[0] = lineRejust ? 0x01 : 0x00;
+	tlv.m_value[1] = motionSync ? 0x01 : 0x00;
+	tlv.m_value[2] = rippleControl ? 0x01 : 0x00;
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_SENSOR, package);
+}
+
+void CMainWindow::SetHuibaoSettingToMouse()
+{
+	int curSel = ((CComboUI*)m_PaintManager.FindControl(L"huiBaoCombo"))->GetCurSel();
+
+	CProtocalTLV tlv;
+	tlv.m_type = 0x45;
+	tlv.m_length = 0x03;
+	tlv.m_value[0] = (unsigned char)(curSel);
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_HUIBAO, package);
+}
+
+void CMainWindow::OnQudouBtnClicked()
+{
+	std::wstring text = m_PaintManager.FindControl(L"qudouTimeEdit")->GetText().GetData();
+	int value = _wtoi(text.c_str());
+	if (!IsNumber(text) || value < 1 || value > 30)
+	{
+		CMyMessageBox::Show(GetHWND(), L"只允许输入1-30");
+		return;
+	}
+
+	CProtocalTLV tlv;
+	tlv.m_type = 0x44;
+	tlv.m_length = 0x03;
+	tlv.m_value[0] = (unsigned char)value;
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	SendSetting(SETTING_CATEGORY_QUDOU, package);
+}
+
+bool CMainWindow::IsNumber(std::wstring text)
+{
+	if (text.empty())
+	{
+		return false;
+	}
+
+	for (auto& ch : text)
+	{
+		if (ch < L'0' || ch > '9')
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
+{
+	// 构造Value
+	unsigned char tlvData[6];
+	memset(tlvData, 0, sizeof(tlvData));
+	tlvData[0] = (unsigned char)keyNum;  // key num
+	tlvData[1] = 0x02;  // report id, 默认是鼠标
+	tlvData[4] = 0x00;  // disable，默认是enable
+	tlvData[5] = 0x01;  // loop count，默认是1
+
+	if (keyIndex == KEY_INDEX_LEFT)
+	{
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_RIGHT)
+	{
+		tlvData[2] = 0x02;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MIDDLE)
+	{
+		tlvData[2] = 0x04;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_BACKWARD)
+	{
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_FORWARD)
+	{
+		tlvData[2] = 0x10;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_DPIPLUS)
+	{
+		tlvData[2] = 0xFF;
+		tlvData[3] = 0xFF;
+	}
+	else if (keyIndex == KEY_INDEX_DPISUB)
+	{
+		tlvData[2] = 0xFF;
+		tlvData[3] = 0x7F;
+	}
+	else if (keyIndex == KEY_INDEX_DPISWITCH)
+	{
+		tlvData[2] = 0xFF;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_HUOLI)
+	{
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x00;
+		tlvData[5] = 0X02;
+	}
+	else if (keyIndex == KEY_INDEX_SANLIANFA)
+	{
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x00;
+		tlvData[5] = 0X03;
+	}
+	else if (keyIndex == KEY_INDEX_LIGHT)
+	{
+		tlvData[2] = 0x0F;
+		tlvData[3] = 0xFF;
+	}
+	else if (keyIndex == KEY_INDEX_COMBIN)
+	{
+		// todo by yejinlong, 组合键待实现
+	}
+	else if (keyIndex == KEY_INDEX_MM_PLAYER)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0x83;
+		tlvData[3] = 0x01;
+	}
+	else if (keyIndex == KEY_INDEX_MM_LAST)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xb6;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_NEXT)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xb5;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_STOP)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xcc;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_PLAY)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xcd;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_MUSE)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xe2;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_VADD)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xe9;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_VSUB)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0xea;
+		tlvData[3] = 0x00;
+	}
+	else if (keyIndex == KEY_INDEX_MM_MAIL)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0x8a;
+		tlvData[3] = 0x01;
+	}
+	else if (keyIndex == KEY_INDEX_MM_CALC)
+	{
+		tlvData[1] = 0x03;
+		tlvData[2] = 0x92;
+		tlvData[3] = 0x01;
+	}
+	else if (keyIndex == KEY_INDEX_COPY)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x06;
+	}
+	else if (keyIndex == KEY_INDEX_PASTE)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x19;
+	}
+	else if (keyIndex == KEY_INDEX_CUT)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x1b;
+	}
+	else if (keyIndex == KEY_INDEX_ALL)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x04;
+	}
+	else if (keyIndex == KEY_INDEX_NEW)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x11;
+	}
+	else if (keyIndex == KEY_INDEX_SAVE)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x16;
+	}
+	else if (keyIndex == KEY_INDEX_PRINT)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x13;
+	}
+	else if (keyIndex == KEY_INDEX_OPEN)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x08;
+	}
+	else if (keyIndex == KEY_INDEX_UNDO)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x01;
+		tlvData[3] = 0x1d;
+	}
+	else if (keyIndex == KEY_INDEX_COMPUTER)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x08;
+	}
+	else if (keyIndex == KEY_INDEX_CLOSEWIN)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x04;
+		tlvData[3] = 0x3d;
+	}
+	else if (keyIndex == KEY_INDEX_DESKTOP)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x07;
+	}
+	else if (keyIndex == KEY_INDEX_RUN)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x15;
+	}
+	else if (keyIndex == KEY_INDEX_MINIMIZE)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x51;
+	}
+	else if (keyIndex == KEY_INDEX_MAXMIZE)
+	{
+		tlvData[1] = 0x01;
+		tlvData[2] = 0x08;
+		tlvData[3] = 0x52;
+	}
+	else if (keyIndex == KEY_INDEX_OPENAPP)
+	{
+		tlvData[1] = 0x04;
+	}
+	else if (keyIndex == KEY_INDEX_OPENWEB)
+	{
+		tlvData[1] = 0x05;
+	}
+	else if (keyIndex == KEY_INDEX_ENTERTEXT)
+	{
+		tlvData[1] = 0x06;
+	}
+	else if (keyIndex == KEY_INDEX_DISABLE)
+	{
+		tlvData[4] = 0x01;
+	}
+
+	// 构造TLV
+	CProtocalTLV tlv;
+	tlv.m_type = 0x40;
+	tlv.m_length = 0x08;
+	memcpy(tlv.m_value, tlvData, sizeof(tlvData));
+
+	// 构造协议包
+	CProtocalPackage package;
+	package.m_reportId = 0xa5;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	// 发送协议包
+	SendSetting(SETTING_CATEGORY_KEY, package);
 }
 
 void CMainWindow::SaveSetting(int settingCategory)
@@ -587,24 +1156,10 @@ void CMainWindow::SaveSetting(int settingCategory)
 		mouseConfig.m_sleepTime = _wtoi(text.c_str());
 	}
 
-	// DPI
+	// DPI	
 	if (settingCategory == SETTING_CATEGORY_DPI)
 	{
-		for (int i = 0; i < ARRAYSIZE(mouseConfig.m_dpiSetting); i++)
-		{			
-			std::wstring controlName = std::wstring(L"dpiValueLabel") + std::to_wstring(i + 1);
-			CLabelUI* dpiValueLabel = (CLabelUI*)m_PaintManager.FindControl(controlName.c_str());
-			std::wstring text = dpiValueLabel->GetText().GetData();
-			mouseConfig.m_dpiSetting[i].m_dpiLevel = _wtoi(text.c_str());
-
-			controlName = std::wstring(L"dpiColorBtn") + std::to_wstring(i + 1);
-			CControlUI* dpiColorBtn = m_PaintManager.FindControl(controlName.c_str());
-			mouseConfig.m_dpiSetting[i].m_dpiColor = dpiColorBtn->GetBkColor();
-			if (mouseConfig.m_dpiSetting[i].m_dpiColor == CURRENT_DPI_TEXT_COLOR)
-			{
-				mouseConfig.m_currentDpi = i;
-			}
-		}
+		GetDpiSetting(mouseConfig.m_currentDpi, mouseConfig.m_dpiSetting);		
 	}
 
 	// 灯效
@@ -655,13 +1210,21 @@ void CMainWindow::SaveSetting(int settingCategory)
 	CSettingManager::GetInstance()->SaveMouseConfig();
 }
 
-void CMainWindow::MyMessageBox(std::wstring text)
+UINT_PTR CMainWindow::ColorDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CMyMessageBox messageBox;
-	messageBox.SetText(text); 
-	messageBox.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
-	messageBox.CenterWindow();
-	messageBox.ShowModal();
+	if (message == WM_INITDIALOG)
+	{
+		// 居中显示窗口
+		RECT rc;
+		GetWindowRect(hwnd, &rc);
+		int width = rc.right - rc.left;
+		int height = rc.bottom - rc.top;
+		int x = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
+		int y = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
+		SetWindowPos(hwnd, NULL, x, y, 0, 0, SWP_NOSIZE);
+	}
+
+	return 0;
 }
 
 void CMainWindow::UpdateControls(int settingCategory)
@@ -725,14 +1288,14 @@ void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& packa
 {
 	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
 	{
-		MyMessageBox(L"鼠标未连接");
+		CMyMessageBox::Show(GetHWND(), L"鼠标未连接");
 		UpdateControls(settingCategory);
 		return;
 	}
 
 	if (!CProtocalUtil::SendPackage(package))
 	{
-		MyMessageBox(L"发送设置给鼠标失败");
+		CMyMessageBox::Show(GetHWND(), L"发送设置给鼠标失败");
 		UpdateControls(settingCategory);
 		return;
 	}
@@ -750,7 +1313,7 @@ void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& packa
 	// 设置成功就更新配置，设置失败恢复界面
 	if (!success)
 	{
-		MyMessageBox(L"设置失败");
+		CMyMessageBox::Show(GetHWND(), L"设置失败");
 		UpdateControls(settingCategory);
 	}
 	else
@@ -770,4 +1333,59 @@ void CMainWindow::PopupKeyMenu(CControlUI* fromControl)
 	POINT pt = { pos.right, pos.top };
 	::ClientToScreen(GetHWND(), &pt);
 	TrackPopupMenu(GetSubMenu(m_keyMenu, 0), TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, pt.x, pt.y, 0, GetHWND(), NULL);
+}
+
+void CMainWindow::GetDpiSetting(int& currentDpiIndex, CMouseDpiSetting dpiSetting[6])
+{
+	for (int i = 0; i < 6; i++)
+	{
+		std::wstring controlName = std::wstring(L"dpiValueLabel") + std::to_wstring(i + 1);
+		CButtonUI* dpiValueLabel = (CButtonUI*)m_PaintManager.FindControl(controlName.c_str());
+		std::wstring text = dpiValueLabel->GetText().GetData();
+		dpiSetting[i].m_dpiLevel = _wtoi(text.c_str());
+
+		controlName = std::wstring(L"dpiColorBtn") + std::to_wstring(i + 1);
+		CControlUI* dpiColorBtn = m_PaintManager.FindControl(controlName.c_str());
+		dpiSetting[i].m_dpiColor = dpiColorBtn->GetBkColor();
+		if (dpiValueLabel->GetTextColor() == CURRENT_DPI_TEXT_COLOR)
+		{
+			currentDpiIndex = i;
+		}
+	}
+}
+
+void CMainWindow::SetDpiSettingToMouse()
+{
+	// 从界面获取DPI设置
+	int currentDpi = 0;
+	CMouseDpiSetting dpiSetting[6];
+	GetDpiSetting(currentDpi, dpiSetting);
+
+	// 构造协议包
+	CProtocalPackage package;
+	package.m_commandId = 0xd1;
+
+	// 添加当前等级
+	CProtocalTLV currentDpiTlv;
+	currentDpiTlv.m_type = 0x41;
+	currentDpiTlv.m_length = 0x03;
+	currentDpiTlv.m_value[0] = (unsigned char)(currentDpi + 1);
+	package.m_tlvs.push_back(currentDpiTlv);
+
+	// 添加每一个等级参数
+	for (int i = 0; i < 6; i++)
+	{
+		CProtocalTLV tlv;
+		tlv.m_type = 0x42;
+		tlv.m_length = 0x08;
+		tlv.m_value[0] = (unsigned char)(i + 1);
+		tlv.m_value[1] = dpiSetting[i].m_dpiLevel & 0xff;
+		tlv.m_value[2] = (dpiSetting[i].m_dpiLevel >> 8) & 0xff;
+		tlv.m_value[3] = GetRValue(dpiSetting[i].m_dpiColor);
+		tlv.m_value[4] = GetGValue(dpiSetting[i].m_dpiColor);
+		tlv.m_value[5] = GetBValue(dpiSetting[i].m_dpiColor);
+		package.m_tlvs.push_back(tlv);
+	}	
+
+	SendSetting(SETTING_CATEGORY_DPI, package);
 }

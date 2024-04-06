@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window caption="0,0,0,30" size="540,170" mininfo="540,170" maxinfo="540,170">
+    <Font id="1" name="微软雅黑" size="12" bold="false"  />
+    <Font id="2" name="微软雅黑" size="14" bold="false" default="true" />
+    <Font id="3" name="微软雅黑" size="10" bold="false" />
+ 
+    <VerticalLayout name="root" bkcolor="#ff272525" bordercolor="#ffbb220a" bordersize="1">
+        <!--标题栏-->
+        <HorizontalLayout height="30" bkcolor="#ffbb220a">            
+        </HorizontalLayout>
+        
+        <VerticalLayout inset="20,20,20,20">
+            <!--DPI值-->
+            <HorizontalLayout height="25">
+                <Control /> 
+                <Label text="DPI (200-26000)：" textcolor="#fff0f0f0" width="125" align="right" />
+                <Edit name="dpiValueEdit" width="60" text="200" bordercolor="#ffa8a8a8" textcolor="#ff000000" bordersize="1" />
+                <Control /> 
+            </HorizontalLayout>
+            
+            <Control /> 
+            
+            <!--确定/取消按钮-->
+            <HorizontalLayout height="30" >
+                <Control />
+                <Button name="okBtn" text="确定" width = "120" textcolor="#fff0f0f0" bkcolor="#ff484848" />
+                <Control width="40" />
+                <Button name="cancelBtn" text="取消" width = "120" textcolor="#fff0f0f0" bkcolor="#ff484848" />
+                <Control />
+            </HorizontalLayout>
+        </VerticalLayout>
+    </VerticalLayout>    
+</Window>

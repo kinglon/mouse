@@ -1,22 +1,19 @@
 #pragma once
 
-class CMyMessageBox : public WindowImplBase
+class CDpiLockWindow : public WindowImplBase
 {
 public:
-	CMyMessageBox();
-	~CMyMessageBox();
+	CDpiLockWindow();
+	~CDpiLockWindow();
 
 public:
 	UIBEGIN_MSG_MAP		
 		EVENT_ID_HANDLER(DUI_MSGTYPE_CLICK, L"okBtn", OnOk)
+		EVENT_ID_HANDLER(DUI_MSGTYPE_CLICK, L"cancelBtn", OnCancel)
 	UIEND_MSG_MAP
 
 public:
-	// 显示一个提示框
-	static void Show(HWND hParentWnd, std::wstring message);
-
-public:
-	void SetText(std::wstring text) { m_text = text; }
+	int GetDpiValue() { return m_dpiValue; }
 
 protected: //override base
 	virtual void InitWindow() override;
@@ -28,8 +25,9 @@ protected: //override base
 
 private:
 	void OnOk(TNotifyUI& msg);
+	void OnCancel(TNotifyUI& msg);
 
 private:
-	std::wstring m_text;
+	int m_dpiValue = 200;
 };
 

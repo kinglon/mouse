@@ -7,6 +7,12 @@
 class CProtocalTLV
 {
 public:
+	CProtocalTLV()
+	{
+		memset(m_value, 0, sizeof(m_value));
+	}
+
+public:
 	// type
 	unsigned char m_type = 0x00;
 
