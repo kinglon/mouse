@@ -28,6 +28,9 @@ public:
 	// @return 发送成功或失败
 	bool SendData(const unsigned char* data, int dataLength);
 
+	// 内存块以16进制的字符串形式输出
+	std::wstring ToHexChar(const unsigned char* pData, int nDataLength, const wchar_t splitChar=L'\0');
+
 private:
 	void ThreadProc();
 

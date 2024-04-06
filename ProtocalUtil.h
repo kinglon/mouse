@@ -3,7 +3,7 @@
 #include <vector>
 
 // TLV
-#define MAX_VALUE_LENGTH 200
+#define MAX_VALUE_LENGTH 300
 class CProtocalTLV
 {
 public:
@@ -44,5 +44,16 @@ public:
 
 	// 解析数据包
 	static bool ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package);
+
+private:
+	/******************************************************
+	*函数名称:CRC16CCITT
+	*输   入:pszBuf  要校验的数据
+			 unLength 校验数据的长
+	*输   出:校验值
+	*功   能:循环冗余校验-16
+	（CCITT标准-0x1021）
+	*******************************************************/
+	static UINT16 CProtocalUtil::CRC16CCITT(UCHAR * pszBuf, UINT unLength);
 };
 

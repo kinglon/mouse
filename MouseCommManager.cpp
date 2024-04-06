@@ -4,6 +4,7 @@
 #include <setupapi.h>
 #include <devguid.h>
 #include <winioctl.h>
+#include "SettingManager.h"
 
 extern "C" {
 #include <hidsdi.h> 
@@ -47,12 +48,38 @@ bool CMouseCommManager::IsMouseConnected()
 	return m_hDeviceHandle != INVALID_HANDLE_VALUE;
 }
 
+std::wstring CMouseCommManager::ToHexChar(const unsigned char* pData, int nDataLength, const wchar_t splitChar)
+{
+	std::wstring strResult;
+	for (int i = 0; i < nDataLength; i++)
+	{
+		if (splitChar != L'\0' && i != 0) 
+		{
+			strResult += splitChar;
+		}
+
+		unsigned char ch = pData[i];
+		wchar_t szBuf[10];
+		memset(szBuf, 0, sizeof(szBuf));
+		swprintf_s(szBuf, L"%02x", (int)ch);
+		strResult += szBuf;
+	}
+
+	return strResult;
+}
+
 bool CMouseCommManager::SendData(const unsigned char* data, int dataLength)
 {
 	if (m_hDeviceHandle == INVALID_HANDLE_VALUE)
 	{
 		LOG_ERROR(L"failed to send data, the mouse device not open");
 		return false;
+	}
+
+	if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
+	{
+		std::wstring dataHex = ToHexChar(data, dataLength);
+		LOG_DEBUG(L"send data: %s", dataHex.c_str());
 	}
 
 	DWORD bytesWritten;
@@ -75,7 +102,7 @@ void CMouseCommManager::ThreadProc()
 		std::wstring devicePath = FindMouseDevice();
 		if (devicePath.empty())
 		{
-			LOG_INFO(L"the mouse device is not found");
+			LOG_DEBUG(L"the mouse device is not found");
 			std::this_thread::sleep_for(std::chrono::seconds(3));
 			continue;
 		}
@@ -105,6 +132,11 @@ void CMouseCommManager::ThreadProc()
 
 			if (bytesRead > 0 && m_callback)
 			{
+				if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
+				{
+					std::wstring dataHex = ToHexChar(buffer, bytesRead);
+					LOG_DEBUG(L"recv data: %s", dataHex.c_str());
+				}
 				m_callback->RecvDataCallback(buffer, bytesRead);
 			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
