@@ -106,3 +106,100 @@ int CKeyMapping::GetKeyIndexByName(std::wstring name)
 
 	return -1;
 }
+
+std::map<int, CKeyStruct>& CKeyMapping::GetKeyStructs()
+{
+	static std::map<int, CKeyStruct> keyStructs;
+	if (keyStructs.size() > 0)
+	{
+		return keyStructs;
+	}
+
+	keyStructs[KEY_INDEX_LEFT] = CKeyStruct(0X02, 0X01, 0X00);
+
+	keyStructs[KEY_INDEX_RIGHT] = CKeyStruct(0X02, 0X02, 0X00);
+
+	keyStructs[KEY_INDEX_MIDDLE] = CKeyStruct(0X02, 0X04, 0X00);
+
+	keyStructs[KEY_INDEX_BACKWARD] = CKeyStruct(0X02, 0X08, 0X00);
+
+	keyStructs[KEY_INDEX_FORWARD] = CKeyStruct(0X02, 0X10, 0X00);
+
+	keyStructs[KEY_INDEX_DPISWITCH] = CKeyStruct(0X02, 0XFF, 0X00);
+
+	keyStructs[KEY_INDEX_DPIPLUS] = CKeyStruct(0X02, 0XFF, 0XFF);
+
+	keyStructs[KEY_INDEX_DPISUB] = CKeyStruct(0X02, 0XFF, 0X7F);
+
+	CKeyStruct huoli = CKeyStruct(0X02, 0X01, 0X00);
+	huoli.m_loopCount = 2;
+	keyStructs[KEY_INDEX_HUOLI] = huoli;
+
+	CKeyStruct sanlianfa = CKeyStruct(0X02, 0X01, 0X00);
+	huoli.m_loopCount = 3;
+	keyStructs[KEY_INDEX_SANLIANFA] = sanlianfa;
+
+	keyStructs[KEY_INDEX_LIGHT] = CKeyStruct(0X02, 0X0F, 0XFF);
+
+	keyStructs[KEY_INDEX_MM_PLAYER] = CKeyStruct(0X03, 0X83, 0X01);
+
+	keyStructs[KEY_INDEX_MM_LAST] = CKeyStruct(0X03, 0XB6, 0X00);
+
+	keyStructs[KEY_INDEX_MM_NEXT] = CKeyStruct(0X03, 0XB5, 0X00);
+
+	keyStructs[KEY_INDEX_MM_STOP] = CKeyStruct(0X03, 0XCC, 0X00);
+
+	keyStructs[KEY_INDEX_MM_PLAY] = CKeyStruct(0X03, 0XCD, 0X00);
+
+	keyStructs[KEY_INDEX_MM_MUSE] = CKeyStruct(0X03, 0XE2, 0X00);
+
+	keyStructs[KEY_INDEX_MM_VADD] = CKeyStruct(0X03, 0XE9, 0X00);
+
+	keyStructs[KEY_INDEX_MM_VSUB] = CKeyStruct(0X03, 0XEA, 0X00);
+
+	keyStructs[KEY_INDEX_MM_MAIL] = CKeyStruct(0X03, 0X8A, 0X01);
+
+	keyStructs[KEY_INDEX_MM_CALC] = CKeyStruct(0X03, 0X92, 0X01);
+
+	keyStructs[KEY_INDEX_COPY] = CKeyStruct(0X01, 0X01, 0X06);
+
+	keyStructs[KEY_INDEX_PASTE] = CKeyStruct(0X01, 0X01, 0X19);
+
+	keyStructs[KEY_INDEX_CUT] = CKeyStruct(0X01, 0X01, 0X1B);
+
+	keyStructs[KEY_INDEX_ALL] = CKeyStruct(0X01, 0X01, 0X04);
+
+	keyStructs[KEY_INDEX_NEW] = CKeyStruct(0X01, 0X01, 0X11);
+
+	keyStructs[KEY_INDEX_SAVE] = CKeyStruct(0X01, 0X01, 0X16);
+
+	keyStructs[KEY_INDEX_PRINT] = CKeyStruct(0X01, 0X01, 0X13);
+
+	keyStructs[KEY_INDEX_OPEN] = CKeyStruct(0X01, 0X08, 0X08);
+
+	keyStructs[KEY_INDEX_UNDO] = CKeyStruct(0X01, 0X01, 0X1D);
+
+	keyStructs[KEY_INDEX_COMPUTER] = CKeyStruct(0X01, 0X08, 0X08);
+
+	keyStructs[KEY_INDEX_CLOSEWIN] = CKeyStruct(0X01, 0X04, 0X3D);
+
+	keyStructs[KEY_INDEX_DESKTOP] = CKeyStruct(0X01, 0X08, 0X07);
+
+	keyStructs[KEY_INDEX_RUN] = CKeyStruct(0X01, 0X08, 0X15);
+
+	keyStructs[KEY_INDEX_MINIMIZE] = CKeyStruct(0X01, 0X08, 0X51);
+
+	keyStructs[KEY_INDEX_MAXMIZE] = CKeyStruct(0X01, 0X08, 0X52);
+
+	CKeyStruct disable;
+	disable.m_disable = 0x01;
+	keyStructs[KEY_INDEX_DISABLE] = disable;
+
+	keyStructs[KEY_INDEX_OPENAPP] = CKeyStruct(0X04, 0X00, 0X00);
+
+	keyStructs[KEY_INDEX_OPENWEB] = CKeyStruct(0X05, 0X00, 0X00);
+
+	keyStructs[KEY_INDEX_ENTERTEXT] = CKeyStruct(0X06, 0X00, 0X00);
+
+	return keyStructs;
+}

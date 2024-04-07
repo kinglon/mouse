@@ -15,10 +15,13 @@
             
             <Control />
             
-            <!--确定按钮-->
+            <!--确定/取消按钮-->
             <HorizontalLayout>
                 <Control />
                 <Button name="okBtn" text="确定" width = "120" textcolor="#fff0f0f0" bkcolor="#ff484848" height="30" />
+                <HorizontalLayout name="cancelArea" visible="false" width="140">
+                    <Button name="cancelBtn" text="取消" width = "120" padding="20,0,0,0" textcolor="#fff0f0f0" bkcolor="#ff484848" height="30" />
+                </HorizontalLayout>
             </HorizontalLayout>
         </VerticalLayout>
     </VerticalLayout>    

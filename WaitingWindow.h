@@ -20,6 +20,9 @@ public:
 	// 设置等待秒数
 	void SetWaitSec(int seconds) { m_waitSeconds = seconds; }
 
+	// 设置标题
+	void SetCaption(std::wstring caption) { m_caption = caption; }
+
 protected: //override base
 	virtual void InitWindow() override;
 	virtual void OnFinalMessage(HWND hWnd) override;
@@ -32,5 +35,7 @@ private:
 	bool m_success = false;
 
 	int m_waitSeconds = 3;
+
+	std::wstring m_caption;
 };
 

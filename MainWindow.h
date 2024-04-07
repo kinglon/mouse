@@ -67,6 +67,16 @@ private:
 	static UINT_PTR WINAPI ColorDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
+	// 运行任务池
+	void RunTaskPool();
+	void GetBatteryFromMouse();
+	void GetMouseSettingFromMouse();
+
+	void RecvBatteryInfo(const CProtocalPackage& package);
+	void RecvProtocalVersion(const CProtocalPackage& package);
+	void RecvMouseSetting(const CProtocalPackage& package);
+
+private:
 	// 使用配置更新控件
 	void UpdateControls(int settingCategory);
 	void UpdateKeyPanel();
@@ -129,4 +139,10 @@ private:
 
 	// 标识是否手动触发
 	bool m_manualTrigger = true;
+
+	// 任务池
+	std::vector<int> m_taskPool;
+
+	// 下一次获取电量的时间
+	DWORD64 m_nextGetBatteryTime = 0;
 };

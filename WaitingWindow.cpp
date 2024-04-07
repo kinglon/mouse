@@ -19,6 +19,7 @@ void CWaitingWindow::InitWindow()
 {
 	__super::InitWindow();
 
+	m_PaintManager.FindControl(L"caption")->SetText(m_caption.c_str());
 	CProgressUI* progress = (CProgressUI*)m_PaintManager.FindControl(L"progress");
 	progress->SetMaxValue(m_waitSeconds);
 	progress->SetValue(0);

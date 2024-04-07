@@ -39,8 +39,8 @@ public:
 	// DPI等级
 	int m_dpiLevel = 800;
 
-	// DPI颜色(RGB)
-	int m_dpiColor = 0xff0000;
+	// DPI颜色(ARGB)
+	unsigned int m_dpiColor = 0xff0000;
 };
 
 class CMouseConfig
@@ -55,6 +55,10 @@ public:
 		m_dpiSetting[4] = CMouseDpiSetting(5000, 0xff00ffff);
 		m_dpiSetting[5] = CMouseDpiSetting(26000, 0xffff00ff);
 	};
+
+public:
+	// keyNum: 1-6
+	void SetKey(int keyNum, int keyIndex);
 
 public:
 	// 第1个按键，默认是左键
@@ -87,10 +91,10 @@ public:
 	// 灯效设置，默认常亮
 	int m_lightIndex = LIGHT_ON;
 
-	// 回报率设置，默认4000HZ
+	// 回报率设置，默认4000HZ, index从0开始
 	int m_huibaorate = HUIBAORATE_4000HZ;
 
-	// 鼠标LOD高度
+	// 鼠标LOD高度, 1或2
 	int m_lodIndex = LOD_1MM;
 
 	// 按键去抖时间，默认1分钟

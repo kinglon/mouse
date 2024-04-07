@@ -5,6 +5,33 @@
 #include "Utility/ImPath.h"
 #include "Utility/ImCharset.h"
 
+void CMouseConfig::SetKey(int keyNum, int keyIndex)
+{
+	switch (keyNum)
+	{
+	case 1:
+		m_firstKey = keyIndex;
+		break;
+	case 2:
+		m_secondKey = keyIndex;
+		break;
+	case 3:
+		m_thirdtKey = keyIndex;
+		break;
+	case 4:
+		m_fourthKey = keyIndex;
+		break;
+	case 5:
+		m_fifthKey = keyIndex;
+		break;
+	case 6:
+		m_sixthKey = keyIndex;
+		break;
+	default:
+		break;
+	}
+}
+
 CSettingManager::CSettingManager()
 {
     Load();

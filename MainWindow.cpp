@@ -35,6 +35,12 @@
 
 #define CURRENT_DPI_TEXT_COLOR	0xffff0000
 
+#define TIMERID_RUNTASKPOOL		100
+
+// 任务ID
+#define TASKID_GET_MOUSE_SETTING		1
+#define TASKID_GET_BATTERY				2
+
 
 CMainWindow::CMainWindow()
 {
@@ -123,6 +129,16 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		return 0L;
 	}
+
+	if (uMsg == WM_TIMER)
+	{
+		int timerId = (int)wParam;
+		if (timerId == TIMERID_RUNTASKPOOL)
+		{
+			RunTaskPool();
+			return 0L;
+		}
+	}
 		
 	return __super::HandleMessage(uMsg, wParam, lParam);
 }
@@ -160,6 +176,11 @@ void CMainWindow::OnSelectChangeEvent(TNotifyUI& msg)
 void CMainWindow::OnWindowInit(TNotifyUI& msg)
 {
 	UpdateControls(SETTING_CATEGORY_ALL);
+
+	m_taskPool.push_back(TASKID_GET_BATTERY);
+	m_taskPool.push_back(TASKID_GET_MOUSE_SETTING);
+	RunTaskPool();
+	SetTimer(GetHWND(), TIMERID_RUNTASKPOOL, 3000, NULL);
 }
 
 void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
@@ -175,13 +196,22 @@ void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 		return;
 	}
 
-	if (package.m_commandId == 0xd1) // 设置鼠标参数响应
+	// 设置鼠标参数成功、重置参数成功
+	if (package.m_commandId == 0xd1 || package.m_commandId == 0xd4)
 	{
 		if (m_waitingWindow)
 		{
 			m_waitingWindow->SetSuccess(true);
 			m_waitingWindow->Close();
 		}
+	}
+	else if (package.m_commandId == 0xd3)
+	{
+		RecvBatteryInfo(package);
+	}
+	else if (package.m_commandId == 0xd0)
+	{
+		RecvMouseSetting(package);
 	}
 }
 
@@ -805,6 +835,50 @@ void CMainWindow::SetHuibaoSettingToMouse()
 	SendSetting(SETTING_CATEGORY_HUIBAO, package);
 }
 
+void CMainWindow::OnResetBtnClicked()
+{
+	if (!CMyMessageBox::Show(GetHWND(), L"当前配置是否需要恢复到默认配置？", true))
+	{
+		return;
+	}
+
+	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
+	{
+		CMyMessageBox::Show(GetHWND(), L"鼠标未连接");
+		return;
+	}	
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd4;
+	if (!CProtocalUtil::SendPackage(package))
+	{
+		CMyMessageBox::Show(GetHWND(), L"重置失败");
+		return;
+	}
+
+	// 显示等待窗口，要么等待超时结束，要么外部设置结果关闭
+	m_waitingWindow = new CWaitingWindow();
+	m_waitingWindow->SetCaption(L"重置中...");
+	m_waitingWindow->SetWaitSec(3);
+	m_waitingWindow->Create(GetHWND(), NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW, 0);
+	m_waitingWindow->CenterWindow();
+	m_waitingWindow->ShowModal();
+	bool success = m_waitingWindow->IsSuccess();
+	delete m_waitingWindow;
+	m_waitingWindow = nullptr;
+	
+	if (!success)
+	{
+		CMyMessageBox::Show(GetHWND(), L"重置失败");
+	}
+	else
+	{
+		CSettingManager::GetInstance()->m_mouseConfig = CMouseConfig();
+		CSettingManager::GetInstance()->SaveMouseConfig();
+		UpdateControls(SETTING_CATEGORY_ALL);
+	}
+}
+
 void CMainWindow::OnQudouBtnClicked()
 {
 	std::wstring text = m_PaintManager.FindControl(L"qudouTimeEdit")->GetText().GetData();
@@ -827,6 +901,17 @@ void CMainWindow::OnQudouBtnClicked()
 	SendSetting(SETTING_CATEGORY_QUDOU, package);
 }
 
+void CMainWindow::OnSystemMouseBtnClicked()
+{
+	HWND hwnd = (HWND)ShellExecute(NULL, NULL, L"control", L"mouse", NULL, SW_SHOW);
+	SetForegroundWindow(hwnd);
+}
+
+void CMainWindow::OnMatchBtnClicked()
+{
+	// todo by yejinlong，配对功能
+}
+
 bool CMainWindow::IsNumber(std::wstring text)
 {
 	if (text.empty())
@@ -847,241 +932,24 @@ bool CMainWindow::IsNumber(std::wstring text)
 
 void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
 {
+	const auto& keyStructs = CKeyMapping::GetKeyStructs();
+	auto it = keyStructs.find(keyIndex);
+	if (it == keyStructs.end())
+	{
+		LOG_ERROR(L"failed to find the key struct of %d", keyIndex);
+		return;
+	}
+
+
 	// 构造Value
 	unsigned char tlvData[6];
 	memset(tlvData, 0, sizeof(tlvData));
 	tlvData[0] = (unsigned char)keyNum;  // key num
-	tlvData[1] = 0x02;  // report id, 默认是鼠标
-	tlvData[4] = 0x00;  // disable，默认是enable
-	tlvData[5] = 0x01;  // loop count，默认是1
-
-	if (keyIndex == KEY_INDEX_LEFT)
-	{
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_RIGHT)
-	{
-		tlvData[2] = 0x02;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MIDDLE)
-	{
-		tlvData[2] = 0x04;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_BACKWARD)
-	{
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_FORWARD)
-	{
-		tlvData[2] = 0x10;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_DPIPLUS)
-	{
-		tlvData[2] = 0xFF;
-		tlvData[3] = 0xFF;
-	}
-	else if (keyIndex == KEY_INDEX_DPISUB)
-	{
-		tlvData[2] = 0xFF;
-		tlvData[3] = 0x7F;
-	}
-	else if (keyIndex == KEY_INDEX_DPISWITCH)
-	{
-		tlvData[2] = 0xFF;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_HUOLI)
-	{
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x00;
-		tlvData[5] = 0X02;
-	}
-	else if (keyIndex == KEY_INDEX_SANLIANFA)
-	{
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x00;
-		tlvData[5] = 0X03;
-	}
-	else if (keyIndex == KEY_INDEX_LIGHT)
-	{
-		tlvData[2] = 0x0F;
-		tlvData[3] = 0xFF;
-	}
-	else if (keyIndex == KEY_INDEX_COMBIN)
-	{
-		// todo by yejinlong, 组合键待实现
-	}
-	else if (keyIndex == KEY_INDEX_MM_PLAYER)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0x83;
-		tlvData[3] = 0x01;
-	}
-	else if (keyIndex == KEY_INDEX_MM_LAST)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xb6;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_NEXT)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xb5;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_STOP)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xcc;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_PLAY)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xcd;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_MUSE)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xe2;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_VADD)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xe9;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_VSUB)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0xea;
-		tlvData[3] = 0x00;
-	}
-	else if (keyIndex == KEY_INDEX_MM_MAIL)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0x8a;
-		tlvData[3] = 0x01;
-	}
-	else if (keyIndex == KEY_INDEX_MM_CALC)
-	{
-		tlvData[1] = 0x03;
-		tlvData[2] = 0x92;
-		tlvData[3] = 0x01;
-	}
-	else if (keyIndex == KEY_INDEX_COPY)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x06;
-	}
-	else if (keyIndex == KEY_INDEX_PASTE)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x19;
-	}
-	else if (keyIndex == KEY_INDEX_CUT)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x1b;
-	}
-	else if (keyIndex == KEY_INDEX_ALL)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x04;
-	}
-	else if (keyIndex == KEY_INDEX_NEW)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x11;
-	}
-	else if (keyIndex == KEY_INDEX_SAVE)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x16;
-	}
-	else if (keyIndex == KEY_INDEX_PRINT)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x13;
-	}
-	else if (keyIndex == KEY_INDEX_OPEN)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x08;
-	}
-	else if (keyIndex == KEY_INDEX_UNDO)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x01;
-		tlvData[3] = 0x1d;
-	}
-	else if (keyIndex == KEY_INDEX_COMPUTER)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x08;
-	}
-	else if (keyIndex == KEY_INDEX_CLOSEWIN)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x04;
-		tlvData[3] = 0x3d;
-	}
-	else if (keyIndex == KEY_INDEX_DESKTOP)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x07;
-	}
-	else if (keyIndex == KEY_INDEX_RUN)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x15;
-	}
-	else if (keyIndex == KEY_INDEX_MINIMIZE)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x51;
-	}
-	else if (keyIndex == KEY_INDEX_MAXMIZE)
-	{
-		tlvData[1] = 0x01;
-		tlvData[2] = 0x08;
-		tlvData[3] = 0x52;
-	}
-	else if (keyIndex == KEY_INDEX_OPENAPP)
-	{
-		tlvData[1] = 0x04;
-	}
-	else if (keyIndex == KEY_INDEX_OPENWEB)
-	{
-		tlvData[1] = 0x05;
-	}
-	else if (keyIndex == KEY_INDEX_ENTERTEXT)
-	{
-		tlvData[1] = 0x06;
-	}
-	else if (keyIndex == KEY_INDEX_DISABLE)
-	{
-		tlvData[4] = 0x01;
-	}
+	tlvData[1] = it->second.m_reportId;  // report id
+	tlvData[2] = it->second.m_keyCode1;  // key code1
+	tlvData[3] = it->second.m_keyCode2;  // key code2
+	tlvData[4] = it->second.m_disable;  // disable
+	tlvData[5] = it->second.m_loopCount;  // loop count
 
 	// 构造TLV
 	CProtocalTLV tlv;
@@ -1227,6 +1095,225 @@ UINT_PTR CMainWindow::ColorDialogProc(HWND hwnd, UINT message, WPARAM wParam, LP
 	return 0;
 }
 
+void CMainWindow::RunTaskPool()
+{
+	// 运行任务内部可能会操作任务池，备份一份操作比较保险
+	auto taskPool = m_taskPool;
+	for (int taskid : taskPool)
+	{
+		if (taskid == TASKID_GET_BATTERY)
+		{
+			GetBatteryFromMouse();
+		}		
+		else if (taskid == TASKID_GET_MOUSE_SETTING)
+		{
+			GetMouseSettingFromMouse();
+		}
+	}
+}
+
+void CMainWindow::GetBatteryFromMouse()
+{
+	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
+	{		
+		return;
+	}
+
+	// 获取时间未到
+	if (GetTickCount64() < m_nextGetBatteryTime)
+	{
+		return;
+	}
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd3;
+	CProtocalUtil::SendPackage(package);
+}
+
+void CMainWindow::RecvBatteryInfo(const CProtocalPackage& package)
+{
+	// 3分钟后再更新
+	m_nextGetBatteryTime = GetTickCount64() + 180000;
+
+	if (package.m_tlvs.size() == 0 || package.m_tlvs[0].m_type != 0x4b)
+	{
+		LOG_ERROR(L"recv an invalid battery tlv");
+		return;
+	}
+
+	int battery = min(package.m_tlvs[0].m_value[0], 100);
+	m_PaintManager.FindControl(L"batteryValue")->SetText((std::to_wstring(battery)+L"%").c_str());
+	
+	int height = (int)((100 - battery) / 100.0f * 50);
+	m_PaintManager.FindControl(L"batteryArea")->SetFixedHeight(height);
+}
+
+
+void CMainWindow::GetMouseSettingFromMouse()
+{
+	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
+	{
+		return;
+	}
+
+	CProtocalPackage package;
+	package.m_commandId = 0xd0;
+	CProtocalUtil::SendPackage(package);
+}
+
+void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
+{
+	// 任务完成，去除它
+	for (auto it = m_taskPool.begin(); it != m_taskPool.end(); it++)
+	{
+		if (*it == TASKID_GET_MOUSE_SETTING)
+		{
+			m_taskPool.erase(it);
+			break;
+		}
+	}
+
+	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
+	for (const auto& tlv : package.m_tlvs)
+	{
+		if (tlv.m_type == 0x40)  // 按键配置
+		{
+			int keyNum = (int)tlv.m_value[0];
+
+			CKeyStruct keyStruct;
+			keyStruct.m_reportId = tlv.m_value[1];
+			keyStruct.m_keyCode1 = tlv.m_value[2];
+			keyStruct.m_keyCode2 = tlv.m_value[3];
+			keyStruct.m_disable = tlv.m_value[4];
+			keyStruct.m_loopCount = tlv.m_value[5];
+
+			int keyIndex = -1;
+			if (keyStruct.m_disable)
+			{
+				keyIndex = KEY_INDEX_DISABLE;
+			}
+			else
+			{
+				const auto& keyStructs = CKeyMapping::GetKeyStructs();
+				for (const auto& item : keyStructs)
+				{
+					const auto& value = item.second;
+					if (value.m_reportId == keyStruct.m_reportId && value.m_keyCode1 == keyStruct.m_keyCode1 \
+						&& value.m_keyCode2 == keyStruct.m_keyCode2 && value.m_loopCount == keyStruct.m_loopCount)
+					{
+						keyIndex = item.first;
+						break;
+					}
+				}
+			}
+
+			if (keyIndex == -1)
+			{
+				LOG_ERROR(L"not found the key: 0x%02x 0x%02x 0x%02x", keyStruct.m_reportId, keyStruct.m_keyCode1, keyStruct.m_keyCode2);
+				continue;
+			}
+
+			mouseConfig.SetKey(keyNum, keyIndex);
+			UpdateKeyPanel();
+		}
+		else if (tlv.m_type == 0x41)  // 当前DPI等级
+		{
+			int dpiIndex = tlv.m_value[0];
+			if (dpiIndex >= 1 && dpiIndex <= 6)
+			{
+				mouseConfig.m_currentDpi = dpiIndex - 1;
+				UpdateDpiPanel();
+			}
+		}
+		else if (tlv.m_type == 0x42)  // DPI等级参数
+		{
+			int dpiIndex = tlv.m_value[0];
+			int dpiValue = tlv.m_value[1] + (tlv.m_value[2] << 8);
+			COLORREF dpiColor = 0xff000000 + RGB(tlv.m_value[3], tlv.m_value[4], tlv.m_value[5]);
+			if (dpiIndex < 1 || dpiIndex > 6 || dpiValue < 100 || dpiValue > 26000)
+			{
+				LOG_ERROR(L"recv an invalid dpi param, index=%d, value=%d", dpiIndex, dpiValue);
+				continue;
+			}
+			mouseConfig.m_dpiSetting[dpiIndex - 1].m_dpiLevel = dpiValue;
+			mouseConfig.m_dpiSetting[dpiIndex - 1].m_dpiColor = dpiColor;
+			UpdateDpiPanel();
+		}
+		else if (tlv.m_type == 0x43)  // LOD
+		{
+			int lodIndex = tlv.m_value[0];
+			if (lodIndex < 1 || lodIndex > 2)
+			{
+				LOG_ERROR(L"recv an invalid lod param, index=%d", lodIndex);
+				continue;
+			}
+			mouseConfig.m_lodIndex = lodIndex;
+			UpdateLodPanel();
+		}
+		else if (tlv.m_type == 0x44)  // 按键去抖
+		{
+			int qudouTime = tlv.m_value[0];
+			if (qudouTime < 0 || qudouTime > 30)
+			{
+				LOG_ERROR(L"recv an invalid qudou param, time=%d", qudouTime);
+				continue;
+			}
+			mouseConfig.m_qudouTime = qudouTime;
+			UpdateQudouPanel();
+		}
+		else if (tlv.m_type == 0x45)  // 回报率参数
+		{
+			int index = tlv.m_value[0];
+			if (index <0 || index > 6)
+			{
+				LOG_ERROR(L"recv an invalid huibao param, index=%d", index);
+				continue;
+			}
+			mouseConfig.m_huibaorate = index;
+			UpdateHuibaoPanel();
+		}
+		else if (tlv.m_type == 0x46)  // 休眠时间
+		{
+			int time = tlv.m_value[0];
+			if (time < 1 || time > 8)
+			{
+				LOG_ERROR(L"recv an invalid sleep time param, time=%d", time);
+				continue;
+			}
+			mouseConfig.m_sleepTime = time;
+			UpdatePowerPannel();
+		}
+		else if (tlv.m_type == 0x47)  // Sensor高阶设置
+		{
+			mouseConfig.m_lineRejust = tlv.m_value[0] == 0x01 ? true : false;
+			mouseConfig.m_motionSync = tlv.m_value[1] == 0x01 ? true : false;
+			mouseConfig.m_rippleControl = tlv.m_value[2] == 0x01 ? true : false;
+			UpdateSensorPanel();
+		}
+		else if (tlv.m_type == 0x48)  // 灯效设置
+		{
+			int ledMode = tlv.m_value[0];
+			if (ledMode < 0 || ledMode > 2)
+			{
+				LOG_ERROR(L"recv an invalid light param, ledmode=%d", ledMode);
+				continue;
+			}
+			mouseConfig.m_lightIndex = ledMode;
+			UpdateLightPanel();
+		}
+		else if (tlv.m_type == 0x49) // 版本号
+		{
+			std::wstring version = std::to_wstring(tlv.m_value[1]) + L'.';
+			version += std::to_wstring(tlv.m_value[2]) + L'.';
+			version += std::to_wstring(tlv.m_value[3]) + L'.';
+			version += std::to_wstring(tlv.m_value[4]);
+			m_PaintManager.FindControl(L"driverVerson")->SetText(version.c_str());
+		}
+	}
+
+	CSettingManager::GetInstance()->SaveMouseConfig();
+}
+
 void CMainWindow::UpdateControls(int settingCategory)
 {
 	// 按键
@@ -1302,6 +1389,7 @@ void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& packa
 
 	// 显示等待窗口，要么等待超时结束，要么外部设置结果关闭
 	m_waitingWindow = new CWaitingWindow();
+	m_waitingWindow->SetCaption(L"鼠标配置中...");
 	m_waitingWindow->SetWaitSec(3);
 	m_waitingWindow->Create(GetHWND(), NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW, 0);
 	m_waitingWindow->CenterWindow();

@@ -9,7 +9,6 @@
 #define KEY_INDEX_MIDDLE	(KEY_INDEX_BASE+3)
 #define KEY_INDEX_FORWARD	(KEY_INDEX_BASE+4)
 #define KEY_INDEX_BACKWARD	(KEY_INDEX_BASE+5)
-#define KEY_INDEX_DPI		(KEY_INDEX_BASE+6)
 #define KEY_INDEX_DPIPLUS	(KEY_INDEX_BASE+7)
 #define KEY_INDEX_DPISUB	(KEY_INDEX_BASE+8)
 #define KEY_INDEX_DPISWITCH	(KEY_INDEX_BASE+9)
@@ -77,6 +76,32 @@ public:
 	int m_commandId = 0;
 };
 
+// 发给鼠标Key的结构
+class CKeyStruct
+{
+public:
+	CKeyStruct() {}
+
+	CKeyStruct(byte reportId, byte keyCode1, byte keyCode2)
+	{
+		m_reportId = reportId;
+		m_keyCode1 = keyCode1;
+		m_keyCode2 = keyCode2;
+	}
+
+public:
+	byte m_reportId = 0x02;
+
+	byte m_keyCode1 = 0x00;
+
+	byte m_keyCode2 = 0x00;
+
+	byte m_disable = 0x00;
+
+	byte m_loopCount = 0x01;
+};
+
+
 class CKeyMapping
 {
 public:
@@ -91,5 +116,8 @@ public:
 
 	// 根据key名称获取Key索引，找不到返回-1
 	static int GetKeyIndexByName(std::wstring name);
+
+	// 获取所有keyvalue列表
+	static std::map<int, CKeyStruct>& GetKeyStructs();
 };
 
