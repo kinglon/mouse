@@ -104,7 +104,7 @@
                 <Control />
                 <HorizontalLayout height="24">
                     <Button name="settingBtn" text="配置" width="75" bkcolor="#ff484848" textcolor="#fff0f0f0" />
-                    <Label text="驱动版本：" textcolor="#fff0f0f0" width="110" align="right" font="1"/>
+                    <Label text="驱动版本：" textcolor="#fff0f0f0" width="80" align="right" font="1"/>
                     <Label name="driverVerson" text="" textcolor="#fff0f0f0" align="left" font="1"/>
                 </HorizontalLayout>
                 <Control height="15" />

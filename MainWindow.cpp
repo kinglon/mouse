@@ -166,6 +166,11 @@ void CMainWindow::OnItemSelectEvent(TNotifyUI& msg)
 
 void CMainWindow::OnSelectChangeEvent(TNotifyUI& msg)
 {
+	if (!m_manualTrigger)
+	{
+		return;
+	}
+
 	std::wstring controlName = msg.pSender->GetName();
 	if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
 	{
@@ -397,7 +402,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 		PopupKeyMenu(msg.pSender);
 	}
 	else if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
-	{
+	{		
 		SetOption((COptionUI*)msg.pSender, ((COptionUI*)msg.pSender)->IsSelected());
 	}
 	else if (controlName.Find(L"dpiColorBtn") == 0)
@@ -1367,7 +1372,9 @@ void CMainWindow::UpdateControls(int settingCategory)
 
 void CMainWindow::SetOption(COptionUI* control, bool check)
 {
+	m_manualTrigger = false;
 	control->Selected(check);
+	m_manualTrigger = true;
 	control->SetBkImage(check ? L"option_check.png" : L"option_uncheck.png");
 }
 

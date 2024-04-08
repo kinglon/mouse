@@ -1,14 +1,11 @@
 #include "stdafx.h"
 #include "MouseCommManager.h"
+#include <hidsdi.h>
 #include <thread>
 #include <setupapi.h>
 #include <devguid.h>
 #include <winioctl.h>
 #include "SettingManager.h"
-
-extern "C" {
-#include <hidsdi.h> 
-};
 
 #pragma comment(lib,"setupapi.lib")
 #pragma comment(lib,"Hid.lib")
@@ -109,7 +106,7 @@ void CMouseCommManager::ThreadProc()
 		LOG_INFO(L"found the mouse device of %s", devicePath.c_str());
 
 		// 打开设备
-		m_hDeviceHandle = CreateFile(devicePath.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+		m_hDeviceHandle = CreateFile(devicePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 		if (m_hDeviceHandle == INVALID_HANDLE_VALUE)
 		{
 			LOG_ERROR(L"failed to open the mouse device, error is %d", GetLastError());
@@ -127,6 +124,7 @@ void CMouseCommManager::ThreadProc()
 				LOG_ERROR(L"failed to read data, error is %d", GetLastError());
 				CloseHandle(m_hDeviceHandle);
 				m_hDeviceHandle = INVALID_HANDLE_VALUE;
+				std::this_thread::sleep_for(std::chrono::seconds(3));
 				break;
 			}
 
@@ -225,7 +223,7 @@ std::wstring CMouseCommManager::FindMouseDevice()
 			continue;
 		}
 
-		if (DevAttributes.VendorID == 0x1111 && DevAttributes.ProductID == 0xf)
+		if (DevAttributes.VendorID == 0x1111 && DevAttributes.ProductID == 0xf && currentDevicePath.find(L"col05") != -1)
 		{
 			devicePath = currentDevicePath;
 			break;
