@@ -10,6 +10,7 @@
 #pragma comment(lib,"setupapi.lib")
 #pragma comment(lib,"Hid.lib")
 
+#define MAX_WRITE_OVERLAPPED  10
 
 CMouseCommManager::CMouseCommManager()
 {
@@ -79,13 +80,28 @@ bool CMouseCommManager::SendData(const unsigned char* data, int dataLength)
 		LOG_DEBUG(L"send data: %s", dataHex.c_str());
 	}
 
-	DWORD bytesWritten;
-	if (!WriteFile(m_hDeviceHandle, data, dataLength, &bytesWritten, NULL))
+	// 超过发送次数，去掉最前面那个
+	if (m_overlappedQueue.size() >= MAX_WRITE_OVERLAPPED)
 	{
-		LOG_ERROR(L"failed to send data, error is %d", GetLastError());
-		return false;
+		LPOVERLAPPED overlapped = m_overlappedQueue.front();
+		CancelIoEx(m_hDeviceHandle, overlapped);		
+		delete overlapped;
+		m_overlappedQueue.pop();
 	}
 
+	LPOVERLAPPED overlapped = new OVERLAPPED();
+	memset(overlapped, 0, sizeof(OVERLAPPED));	
+	if (!WriteFile(m_hDeviceHandle, data, dataLength, nullptr, overlapped))
+	{
+		if (GetLastError() != ERROR_IO_PENDING)
+		{
+			LOG_ERROR(L"failed to send data2, error is %d", GetLastError());
+			delete overlapped;
+			return false;
+		}		
+	}
+
+	m_overlappedQueue.push(overlapped);
 	return true;
 }
 
@@ -106,7 +122,8 @@ void CMouseCommManager::ThreadProc()
 		LOG_INFO(L"found the mouse device of %s", devicePath.c_str());
 
 		// 打开设备
-		m_hDeviceHandle = CreateFile(devicePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		m_hDeviceHandle = CreateFile(devicePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, \
+			NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 		if (m_hDeviceHandle == INVALID_HANDLE_VALUE)
 		{
 			LOG_ERROR(L"failed to open the mouse device, error is %d", GetLastError());
@@ -115,13 +132,27 @@ void CMouseCommManager::ThreadProc()
 		}
 
 		// 读取数据
-		unsigned char buffer[10240];
-		DWORD bytesRead = 0;
+		unsigned char buffer[200];
 		while (true)
 		{
-			if (!ReadFile(m_hDeviceHandle, buffer, sizeof(buffer), &bytesRead, NULL))
+			OVERLAPPED overlapped;
+			memset(&overlapped, 0, sizeof(OVERLAPPED));			
+			if (!ReadFile(m_hDeviceHandle, buffer, sizeof(buffer), nullptr, &overlapped))
 			{
-				LOG_ERROR(L"failed to read data, error is %d", GetLastError());
+				if (GetLastError() != ERROR_IO_PENDING)
+				{
+					LOG_ERROR(L"failed to read data when calling ReadFile, error is %d", GetLastError());					
+					CloseHandle(m_hDeviceHandle);
+					m_hDeviceHandle = INVALID_HANDLE_VALUE;
+					std::this_thread::sleep_for(std::chrono::seconds(3));
+					break;
+				}
+			}
+		
+			DWORD bytesRead = 0;
+			if (!GetOverlappedResult(m_hDeviceHandle, &overlapped, &bytesRead, TRUE))
+			{
+				LOG_ERROR(L"failed to read data when calling GetOverlappedResult, error is %d", GetLastError());				
 				CloseHandle(m_hDeviceHandle);
 				m_hDeviceHandle = INVALID_HANDLE_VALUE;
 				std::this_thread::sleep_for(std::chrono::seconds(3));

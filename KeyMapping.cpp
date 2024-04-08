@@ -175,7 +175,7 @@ std::map<int, CKeyStruct>& CKeyMapping::GetKeyStructs()
 
 	keyStructs[KEY_INDEX_PRINT] = CKeyStruct(0X01, 0X01, 0X13);
 
-	keyStructs[KEY_INDEX_OPEN] = CKeyStruct(0X01, 0X08, 0X08);
+	keyStructs[KEY_INDEX_OPEN] = CKeyStruct(0X01, 0X01, 0X08);
 
 	keyStructs[KEY_INDEX_UNDO] = CKeyStruct(0X01, 0X01, 0X1D);
 

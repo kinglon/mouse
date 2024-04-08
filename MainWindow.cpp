@@ -38,8 +38,10 @@
 #define TIMERID_RUNTASKPOOL		100
 
 // 任务ID
-#define TASKID_GET_MOUSE_SETTING		1
-#define TASKID_GET_BATTERY				2
+#define TASKID_GET_BATTERY				1
+#define TASKID_GET_DPI_SETTING			2   // 当前DPI及6个DPI参数
+#define TASKID_GET_KEY_SETTING			3	// 按键参数
+#define TASKID_GET_OTHER_SETTING		4	// 其他参数
 
 
 CMainWindow::CMainWindow()
@@ -183,7 +185,9 @@ void CMainWindow::OnWindowInit(TNotifyUI& msg)
 	UpdateControls(SETTING_CATEGORY_ALL);
 
 	m_taskPool.push_back(TASKID_GET_BATTERY);
-	m_taskPool.push_back(TASKID_GET_MOUSE_SETTING);
+	m_taskPool.push_back(TASKID_GET_KEY_SETTING);
+	m_taskPool.push_back(TASKID_GET_DPI_SETTING);
+	m_taskPool.push_back(TASKID_GET_OTHER_SETTING);
 	RunTaskPool();
 	SetTimer(GetHWND(), TIMERID_RUNTASKPOOL, 3000, NULL);
 }
@@ -1110,9 +1114,17 @@ void CMainWindow::RunTaskPool()
 		{
 			GetBatteryFromMouse();
 		}		
-		else if (taskid == TASKID_GET_MOUSE_SETTING)
+		else if (taskid == TASKID_GET_KEY_SETTING)
 		{
-			GetMouseSettingFromMouse();
+			GetMouseSettingFromMouse(TASKID_GET_KEY_SETTING);
+		}
+		else if (taskid == TASKID_GET_DPI_SETTING)
+		{
+			GetMouseSettingFromMouse(TASKID_GET_DPI_SETTING);
+		}
+		else if (taskid == TASKID_GET_OTHER_SETTING)
+		{
+			GetMouseSettingFromMouse(TASKID_GET_OTHER_SETTING);
 		}
 	}
 }
@@ -1153,8 +1165,7 @@ void CMainWindow::RecvBatteryInfo(const CProtocalPackage& package)
 	m_PaintManager.FindControl(L"batteryArea")->SetFixedHeight(height);
 }
 
-
-void CMainWindow::GetMouseSettingFromMouse()
+void CMainWindow::GetMouseSettingFromMouse(int taskId)
 {
 	if (!CMouseCommManager::GetInstance()->IsMouseConnected())
 	{
@@ -1163,26 +1174,80 @@ void CMainWindow::GetMouseSettingFromMouse()
 
 	CProtocalPackage package;
 	package.m_commandId = 0xd0;
+	
+	if (taskId == TASKID_GET_KEY_SETTING)
+	{
+		CProtocalTLV tlv;
+		tlv.m_type = 0x40;
+		tlv.m_length = 0x08;
+		package.m_tlvs.push_back(tlv);
+	}
+	else if (taskId == TASKID_GET_DPI_SETTING)
+	{
+		CProtocalTLV tlv;
+		tlv.m_type = 0x41;
+		tlv.m_length = 0x03;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x42;
+		tlv.m_length = 0x08;
+		package.m_tlvs.push_back(tlv);
+	}
+	else if (taskId == TASKID_GET_OTHER_SETTING)
+	{
+		CProtocalTLV tlv;
+		tlv.m_type = 0x43;
+		tlv.m_length = 0x03;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x44;
+		tlv.m_length = 0x03;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x45;
+		tlv.m_length = 0x03;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x46;
+		tlv.m_length = 0x03;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x47;
+		tlv.m_length = 0x05;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x48;
+		tlv.m_length = 0x05;
+		package.m_tlvs.push_back(tlv);
+
+		tlv.m_type = 0x49;
+		tlv.m_length = 0x07;
+		package.m_tlvs.push_back(tlv);
+	}
 	CProtocalUtil::SendPackage(package);
 }
 
-void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
+void CMainWindow::RemoveTask(int taskId)
 {
-	// 任务完成，去除它
 	for (auto it = m_taskPool.begin(); it != m_taskPool.end(); it++)
 	{
-		if (*it == TASKID_GET_MOUSE_SETTING)
+		if (*it == taskId)
 		{
 			m_taskPool.erase(it);
 			break;
 		}
 	}
+}
 
+void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
+{
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 	for (const auto& tlv : package.m_tlvs)
 	{
 		if (tlv.m_type == 0x40)  // 按键配置
 		{
+			RemoveTask(TASKID_GET_KEY_SETTING);
+
 			int keyNum = (int)tlv.m_value[0];
 
 			CKeyStruct keyStruct;
@@ -1223,6 +1288,8 @@ void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
 		}
 		else if (tlv.m_type == 0x41)  // 当前DPI等级
 		{
+			RemoveTask(TASKID_GET_DPI_SETTING);
+
 			int dpiIndex = tlv.m_value[0];
 			if (dpiIndex >= 1 && dpiIndex <= 6)
 			{
@@ -1308,6 +1375,8 @@ void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
 		}
 		else if (tlv.m_type == 0x49) // 版本号
 		{
+			RemoveTask(TASKID_GET_OTHER_SETTING);
+
 			std::wstring version = std::to_wstring(tlv.m_value[1]) + L'.';
 			version += std::to_wstring(tlv.m_value[2]) + L'.';
 			version += std::to_wstring(tlv.m_value[3]) + L'.';

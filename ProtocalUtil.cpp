@@ -5,6 +5,9 @@
 // 数据包固定域大小
 #define PACKAGE_FIXED_SIZE  6
 
+// 数据协议包大小
+#define OUTPUT_REPORT_LENGTH	64
+
 
 UINT16 CProtocalUtil::CRC16CCITT(UCHAR * pszBuf, UINT unLength)
 {
@@ -38,16 +41,16 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	for (const auto& tlv : package.m_tlvs)
 	{
 		tlvDataLength += (int)tlv.m_length;
-	}
-	if (tlvDataLength >= 256)
-	{
-		LOG_ERROR(L"the tlv data length is too large");
-		return false;
-	}
+	}	
 
 	int totalDataLength = PACKAGE_FIXED_SIZE + tlvDataLength;
-	unsigned char* data = new unsigned char[totalDataLength];
-	memset(data, 0, totalDataLength);
+	if (totalDataLength > OUTPUT_REPORT_LENGTH)
+	{
+		LOG_ERROR(L"the size of the package is greater than %d", OUTPUT_REPORT_LENGTH);
+		return false;
+	}
+	unsigned char* data = new unsigned char[OUTPUT_REPORT_LENGTH];
+	memset(data, 0, OUTPUT_REPORT_LENGTH);
 
 	// 填充固定域
 	int offset = 0;
@@ -71,7 +74,7 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	data[offset++] = crc & 0xff;
 
 	// 发送
-	bool success = CMouseCommManager::GetInstance()->SendData(data, totalDataLength);
+	bool success = CMouseCommManager::GetInstance()->SendData(data, OUTPUT_REPORT_LENGTH);
 	delete[] data;
 
 	return success;
@@ -79,20 +82,10 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 
 bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package)
 {
-	if (data == nullptr || dataLength <= 2)
+	if (data == nullptr || dataLength < PACKAGE_FIXED_SIZE)
 	{
 		return false;
-	}
-
-	// crc校验
-	unsigned short crc = CRC16CCITT((unsigned char*)data, dataLength-2);
-	unsigned char high = (crc >> 8) & 0xff;
-	unsigned char low = crc & 0xff;
-	if (high != data[dataLength - 2] || low != data[dataLength - 1])
-	{
-		LOG_ERROR(L"crc is wrong");
-		return false;
-	}
+	}	
 
 	// 解析固定域
 	int offset = 0;
@@ -100,9 +93,19 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CPro
 	package.m_commandId = data[offset++];
 	int tlvCount = (int)data[offset++];
 	unsigned char tlvDataLength = data[offset++];
-	if (tlvDataLength != dataLength - PACKAGE_FIXED_SIZE)
+	int realDataLength = tlvDataLength + PACKAGE_FIXED_SIZE;
+	if (realDataLength > dataLength)
 	{
 		LOG_ERROR(L"the tlv data length is wrong");
+		return false;
+	}
+
+	// crc校验
+	unsigned short crc = CRC16CCITT((unsigned char*)data, realDataLength - 2);
+	unsigned short myCrc = data[realDataLength - 2] + (data[realDataLength - 1] << 8);
+	if (crc != myCrc)
+	{
+		LOG_ERROR(L"crc is wrong, 0x%02X != 0x%02X", crc, myCrc);
 		return false;
 	}
 

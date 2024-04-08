@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 class IMouseCommCallback
 {
 public:
@@ -43,5 +45,8 @@ private:
 	IMouseCommCallback* m_callback = nullptr;
 
 	HANDLE m_hDeviceHandle = INVALID_HANDLE_VALUE;
+
+	// 发送数据OVERLAPPED队列
+	std::queue<LPOVERLAPPED> m_overlappedQueue;
 };
 
