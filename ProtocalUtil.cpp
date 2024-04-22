@@ -80,12 +80,46 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	return success;
 }
 
-bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package)
-{
-	if (data == nullptr || dataLength < PACKAGE_FIXED_SIZE)
+bool CProtocalUtil::ParsePackage(const unsigned char* data2, int dataLength2, CProtocalPackage& package)
+{	
+	static int dataMaxLength = 6400; // 最大长度
+	static int dataLength = 0; // 当前数据长度
+	static unsigned char* data = new unsigned char[dataMaxLength];
+
+	// 至少要有一个字节 0x5A
+	if (data2 == nullptr || dataLength2 < 1)
 	{
+		LOG_ERROR(L"invalid param");
+		dataLength = 0;
 		return false;
-	}	
+	}
+
+	// 数据传输有误，重置下数据缓冲区
+	if (dataLength + dataLength2 >= dataMaxLength)
+	{
+		LOG_ERROR(L"the data length is too long");
+		dataLength = 0;
+		return false;
+	}
+
+	// 拷贝数据，要考虑拆包情况
+	if (dataLength == 0)
+	{
+		memcpy(data, data2, dataLength2);
+		dataLength = dataLength2;
+	}
+	else
+	{
+		memcpy(&data[dataLength], &data2[1], dataLength2-1);  // 第一个字节0x5A不要
+		dataLength += dataLength2 - 1;
+	}
+	
+	if (dataLength < PACKAGE_FIXED_SIZE)
+	{
+		LOG_ERROR(L"the data length is too short");
+		dataLength = 0;
+		return false;
+	}
 
 	// 解析固定域
 	int offset = 0;
@@ -96,16 +130,17 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CPro
 	int realDataLength = tlvDataLength + PACKAGE_FIXED_SIZE;
 	if (realDataLength > dataLength)
 	{
-		LOG_ERROR(L"the tlv data length is wrong");
+		LOG_INFO(L"total length is %d, recv length is %d", realDataLength, dataLength);
 		return false;
 	}
 
 	// crc校验
 	unsigned short crc = CRC16CCITT((unsigned char*)data, realDataLength - 2);
-	unsigned short myCrc = data[realDataLength - 2] + (data[realDataLength - 1] << 8);
+	unsigned short myCrc = (data[realDataLength - 2] << 8) + data[realDataLength - 1];
 	if (crc != myCrc)
 	{
 		LOG_ERROR(L"crc is wrong, 0x%02X != 0x%02X", crc, myCrc);
+		dataLength = 0;
 		return false;
 	}
 
@@ -118,6 +153,7 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CPro
 		if (offset + 2 > tlvDataLength)
 		{
 			LOG_ERROR(L"the tlv data length is less");
+			dataLength = 0;
 			return false;
 		}
 		tlv.m_type = tlvData[offset++];
@@ -126,6 +162,7 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CPro
 		if (offset + tlv.m_length > tlvDataLength)
 		{
 			LOG_ERROR(L"the tlv data length is less");
+			dataLength = 0;
 			return false;
 		}
 		memcpy(tlv.m_value, tlvData + offset, tlv.m_length);
@@ -134,5 +171,6 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data, int dataLength, CPro
 		package.m_tlvs.push_back(tlv);
 	}
 
+	dataLength = 0;
 	return true;
 }

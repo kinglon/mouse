@@ -69,9 +69,8 @@ private:
 private:
 	// 运行任务池
 	void RunTaskPool();
-	void RemoveTask(int taskId);
 	void GetBatteryFromMouse();
-	void GetMouseSettingFromMouse(int taskId);
+	void GetMouseSettingFromMouse();
 
 	void RecvBatteryInfo(const CProtocalPackage& package);
 	void RecvProtocalVersion(const CProtocalPackage& package);

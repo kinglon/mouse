@@ -4,23 +4,23 @@
     <Font id="2" name="微软雅黑" size="14" bold="false" default="true" />
     <Font id="3" name="微软雅黑" size="10" bold="false" />
  
-    <VerticalLayout name="root" bkcolor="#ff272525" bordercolor="#ffbb220a" bordersize="1">
+    <VerticalLayout name="root" bkcolor="#ff262626" bordercolor="#ffbd220d" bordersize="1">
         <!--标题栏-->
-        <HorizontalLayout height="30" bkcolor="#ffbb220a">            
+        <HorizontalLayout height="30" bkcolor="#ffbd220d">            
         </HorizontalLayout>
         
         <VerticalLayout inset="20,20,20,20">
             <!--消息内容-->
-            <Label name="textLabel" text="" textcolor="#fff0f0f0" align="center" valign="center" />
+            <Label name="textLabel" text="" textcolor="#ffb4b4b4" align="center" valign="center" />
             
             <Control />
             
             <!--确定/取消按钮-->
             <HorizontalLayout>
                 <Control />
-                <Button name="okBtn" text="确定" width = "120" textcolor="#fff0f0f0" bkcolor="#ff484848" height="30" />
+                <Button name="okBtn" text="确定" width = "120" textcolor="#ffb4b4b4" bkcolor="#ff393939" height="30" />
                 <HorizontalLayout name="cancelArea" visible="false" width="140">
-                    <Button name="cancelBtn" text="取消" width = "120" padding="20,0,0,0" textcolor="#fff0f0f0" bkcolor="#ff484848" height="30" />
+                    <Button name="cancelBtn" text="取消" width = "120" padding="20,0,0,0" textcolor="#ffb4b4b4" bkcolor="#ff393939" height="30" />
                 </HorizontalLayout>
             </HorizontalLayout>
         </VerticalLayout>
