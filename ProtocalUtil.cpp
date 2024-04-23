@@ -146,7 +146,7 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data2, int dataLength2, CP
 
 	// 解析tlv	
 	const unsigned char* tlvData = &data[offset];
-	offset = 0;
+	offset = 0; // 每个TLV的开头位置
 	for (int i = 0; i < tlvCount; i++)
 	{
 		CProtocalTLV tlv;
@@ -156,8 +156,8 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data2, int dataLength2, CP
 			dataLength = 0;
 			return false;
 		}
-		tlv.m_type = tlvData[offset++];
-		tlv.m_length = tlvData[offset++];
+		tlv.m_type = tlvData[offset];
+		tlv.m_length = tlvData[offset+1];
 		
 		if (offset + tlv.m_length > tlvDataLength)
 		{
@@ -165,7 +165,7 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data2, int dataLength2, CP
 			dataLength = 0;
 			return false;
 		}
-		memcpy(tlv.m_value, tlvData + offset, tlv.m_length);
+		memcpy(tlv.m_value, tlvData + offset + 2, tlv.m_length-2);
 		offset += tlv.m_length;
 
 		package.m_tlvs.push_back(tlv);
@@ -173,4 +173,16 @@ bool CProtocalUtil::ParsePackage(const unsigned char* data2, int dataLength2, CP
 
 	dataLength = 0;
 	return true;
+}
+
+std::string CProtocalUtil::HexChar2Bytes(const std::string& hexChars)
+{
+	std::string result;
+	for (size_t i = 0; i < hexChars.length(); i += 2) 
+	{
+		std::string byteString = hexChars.substr(i, 2);
+		char ch = (char)std::stoul(byteString, nullptr, 16);
+		result.push_back(ch);
+	}
+	return result;
 }

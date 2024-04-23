@@ -173,7 +173,7 @@ void CSettingManager::LoadMouseConfig(const std::wstring& configName)
 		for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_dpiSetting) && i < root["dpiSetting"].size(); i++)
 		{
 			m_mouseConfig.m_dpiSetting[i].m_dpiLevel = root["dpiSetting"][i]["dpiLevel"].asInt();
-			m_mouseConfig.m_dpiSetting[i].m_dpiColor = root["dpiSetting"][i]["dpiColor"].asInt();
+			m_mouseConfig.m_dpiSetting[i].m_dpiColor = root["dpiSetting"][i]["dpiColor"].asUInt();
 		}
 	}
 

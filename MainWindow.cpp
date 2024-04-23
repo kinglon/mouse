@@ -150,8 +150,9 @@ void CMainWindow::RecvDataCallback(unsigned char* data, int dataLength)
 		return;
 	}
 
-	LPARAM lparam = (LPARAM)new unsigned char[dataLength];
-	PostMessage(WM_MOUSE_DATA_ARRIVE, (WPARAM)dataLength, lparam);
+	unsigned char* lparam = new unsigned char[dataLength];
+	memcpy(lparam, data, dataLength);
+	PostMessage(WM_MOUSE_DATA_ARRIVE, (WPARAM)dataLength, (LPARAM)lparam);
 }
 
 void CMainWindow::OnItemSelectEvent(TNotifyUI& msg)

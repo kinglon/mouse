@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include "IcrCriticalSection.h"
 
 class IMouseCommCallback
 {
@@ -39,6 +40,12 @@ private:
 	// 查找鼠标设备，返回设备路径
 	std::wstring FindMouseDevice();
 
+	// 读数据
+	bool ReadData();
+
+	// 写数据
+	bool WriteData();
+
 private:
 	bool m_isInit = false;
 
@@ -46,7 +53,10 @@ private:
 
 	HANDLE m_hDeviceHandle = INVALID_HANDLE_VALUE;
 
-	// 发送数据OVERLAPPED队列
-	std::queue<LPOVERLAPPED> m_overlappedQueue;
+	// 待发送的数据队列
+	std::queue<std::string> m_sendDatas;
+
+	// 同步对象
+	CCSWrap m_cs;
 };
 

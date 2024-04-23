@@ -51,6 +51,9 @@ public:
 	// 解析数据包
 	static bool ParsePackage(const unsigned char* data, int dataLength, CProtocalPackage& package);
 
+	// 16进制的字符串转成字节流
+	static std::string HexChar2Bytes(const std::string& hexChars);
+
 private:
 	/******************************************************
 	*函数名称:CRC16CCITT

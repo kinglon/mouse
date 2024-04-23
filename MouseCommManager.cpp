@@ -10,8 +10,6 @@
 #pragma comment(lib,"setupapi.lib")
 #pragma comment(lib,"Hid.lib")
 
-#define MAX_WRITE_OVERLAPPED  10
-
 CMouseCommManager::CMouseCommManager()
 {
 }
@@ -74,34 +72,10 @@ bool CMouseCommManager::SendData(const unsigned char* data, int dataLength)
 		return false;
 	}
 
-	if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
-	{
-		std::wstring dataHex = ToHexChar(data, dataLength);
-		LOG_DEBUG(L"send data: %s", dataHex.c_str());
-	}
+	CIcrCriticalSection cs(m_cs.GetCS());
+	m_sendDatas.push(std::string((const char*)data, dataLength));
+	cs.Leave();
 
-	// 超过发送次数，去掉最前面那个
-	if (m_overlappedQueue.size() >= MAX_WRITE_OVERLAPPED)
-	{
-		LPOVERLAPPED overlapped = m_overlappedQueue.front();
-		CancelIoEx(m_hDeviceHandle, overlapped);		
-		delete overlapped;
-		m_overlappedQueue.pop();
-	}
-
-	LPOVERLAPPED overlapped = new OVERLAPPED();
-	memset(overlapped, 0, sizeof(OVERLAPPED));	
-	if (!WriteFile(m_hDeviceHandle, data, dataLength, nullptr, overlapped))
-	{
-		if (GetLastError() != ERROR_IO_PENDING)
-		{
-			LOG_ERROR(L"failed to send data2, error is %d", GetLastError());
-			delete overlapped;
-			return false;
-		}		
-	}
-
-	m_overlappedQueue.push(overlapped);
 	return true;
 }
 
@@ -131,43 +105,18 @@ void CMouseCommManager::ThreadProc()
 			continue;
 		}
 
-		// 读取数据
-		unsigned char buffer[200];
 		while (true)
 		{
-			OVERLAPPED overlapped;
-			memset(&overlapped, 0, sizeof(OVERLAPPED));			
-			if (!ReadFile(m_hDeviceHandle, buffer, sizeof(buffer), nullptr, &overlapped))
+			if (!WriteData())
 			{
-				if (GetLastError() != ERROR_IO_PENDING)
-				{
-					LOG_ERROR(L"failed to read data when calling ReadFile, error is %d", GetLastError());					
-					CloseHandle(m_hDeviceHandle);
-					m_hDeviceHandle = INVALID_HANDLE_VALUE;
-					std::this_thread::sleep_for(std::chrono::seconds(3));
-					break;
-				}
-			}
-		
-			DWORD bytesRead = 0;
-			if (!GetOverlappedResult(m_hDeviceHandle, &overlapped, &bytesRead, TRUE))
-			{
-				LOG_ERROR(L"failed to read data when calling GetOverlappedResult, error is %d", GetLastError());				
-				CloseHandle(m_hDeviceHandle);
-				m_hDeviceHandle = INVALID_HANDLE_VALUE;
-				std::this_thread::sleep_for(std::chrono::seconds(3));
 				break;
 			}
 
-			if (bytesRead > 0 && m_callback)
+			if (!ReadData())
 			{
-				if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
-				{
-					std::wstring dataHex = ToHexChar(buffer, bytesRead);
-					LOG_DEBUG(L"recv data: %s", dataHex.c_str());
-				}
-				m_callback->RecvDataCallback(buffer, bytesRead);
+				break;
 			}
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
@@ -263,4 +212,104 @@ std::wstring CMouseCommManager::FindMouseDevice()
 
 	SetupDiDestroyDeviceInfoList(DevInfo);
 	return devicePath;
+}
+
+bool CMouseCommManager::ReadData()
+{	
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(OVERLAPPED));
+	overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	unsigned char buffer[64];
+	if (!ReadFile(m_hDeviceHandle, buffer, sizeof(buffer), nullptr, &overlapped))
+	{
+		if (GetLastError() != ERROR_IO_PENDING)
+		{
+			LOG_ERROR(L"failed to read data when calling ReadFile, error is %d", GetLastError());
+			CloseHandle(overlapped.hEvent);
+			CloseHandle(m_hDeviceHandle);
+			m_hDeviceHandle = INVALID_HANDLE_VALUE;
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+			return false;
+		}
+	}
+
+	if (WaitForSingleObject(overlapped.hEvent, 100) != WAIT_OBJECT_0)
+	{
+		CancelIoEx(m_hDeviceHandle, &overlapped);
+		CloseHandle(overlapped.hEvent);
+		return true;
+	}
+	CloseHandle(overlapped.hEvent);
+
+	DWORD bytesRead = 0;
+	if (!GetOverlappedResult(m_hDeviceHandle, &overlapped, &bytesRead, false))
+	{
+		LOG_ERROR(L"failed to read data when calling GetOverlappedResult, error is %d", GetLastError());		
+		return true;		
+	}
+
+	if (bytesRead == 0)
+	{
+		LOG_ERROR(L"recv a data with nothing");
+	}
+	else if (bytesRead > 0 && m_callback)
+	{
+		if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
+		{
+			std::wstring dataHex = ToHexChar(buffer, bytesRead);
+			LOG_DEBUG(L"recv data: %s", dataHex.c_str());
+		}
+		m_callback->RecvDataCallback(buffer, bytesRead);
+	}
+
+	return true;
+}
+
+bool CMouseCommManager::WriteData()
+{
+	std::vector<std::string> sendDatas;
+	CIcrCriticalSection cs(m_cs.GetCS());
+	while (!m_sendDatas.empty())
+	{
+		sendDatas.push_back(m_sendDatas.front());
+		m_sendDatas.pop();
+	}
+	cs.Leave();
+
+	for (auto& data : sendDatas)
+	{
+		if (CSettingManager::GetInstance()->m_logLevel >= (int)ELogLevel::LOG_LEVEL_DEBUG)
+		{
+			std::wstring dataHex = ToHexChar((const unsigned char*)data.c_str(), data.length());
+			LOG_DEBUG(L"send data: %s", dataHex.c_str());
+		}
+
+		OVERLAPPED overlapped;
+		memset(&overlapped, 0, sizeof(OVERLAPPED));
+		overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);		
+		if (!WriteFile(m_hDeviceHandle, data.c_str(), data.length(), nullptr, &overlapped))
+		{
+			if (GetLastError() != ERROR_IO_PENDING)
+			{
+				LOG_ERROR(L"failed to send data, error is %d", GetLastError());
+				CloseHandle(overlapped.hEvent);
+				CloseHandle(m_hDeviceHandle);
+				m_hDeviceHandle = INVALID_HANDLE_VALUE;
+				std::this_thread::sleep_for(std::chrono::seconds(3));
+				return false;
+			}
+		}
+
+		if (WaitForSingleObject(overlapped.hEvent, 1000) != WAIT_OBJECT_0)
+		{
+			LOG_ERROR(L"failed to send data, error is timeout");
+			CancelIoEx(m_hDeviceHandle, &overlapped);
+			CloseHandle(overlapped.hEvent);
+			return true;
+		}
+		CloseHandle(overlapped.hEvent);
+	}
+
+	return true;
 }
