@@ -477,6 +477,11 @@ void CComboUI::DoEvent(TEventUI& event)
     }
     if( event.Type == UIEVENT_SCROLLWHEEL )
     {
+		if (!m_mouseWheelEnable)
+		{
+			return;
+		}
+
         bool bDownward = LOWORD(event.wParam) == SB_LINEDOWN;
 		SetSelectCloseFlag(false);
         SelectItem(FindSelectable(m_iCurSel + (bDownward ? 1 : -1), bDownward));

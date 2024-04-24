@@ -111,6 +111,10 @@ public:
 	void SetTipTextColor(DWORD dwTipTextColor);
 	CDuiString GetTipText() const;
 	void SetTipText(LPCTSTR pstrText);
+
+	void SetMouseWheelEnable(bool enable) { m_mouseWheelEnable = enable; }
+	bool IsMouseWheelEnable() { return m_mouseWheelEnable; }
+
 protected:
     CComboWnd* m_pWindow;
 
@@ -135,6 +139,8 @@ protected:
 	CDuiString m_sTipText;
 	DWORD m_dwTipTextColor;
 	UINT uTextStyle;
+
+	bool m_mouseWheelEnable = true;
 };
 
 } // namespace DuiLib

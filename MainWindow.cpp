@@ -33,6 +33,9 @@
 // selectitem事件处理函数内不能ShowModal()，于是异步发送一个新消息
 #define WM_SELECT_ITEM			WM_USER+101
 
+// selectchange事件处理函数内不能ShowModal()，于是异步发送一个新消息
+#define WM_SELECT_CHANGE		WM_USER+102
+
 #define CURRENT_DPI_TEXT_COLOR	0xffff0000
 
 #define TIMERID_RUNTASKPOOL		100
@@ -130,6 +133,17 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return 0L;
 	}
 
+	if (uMsg == WM_SELECT_CHANGE)
+	{		
+		CControlUI* control = (CControlUI*)lParam;
+		std::wstring controlName = control->GetName();
+		if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
+		{
+			SetSensorSettingToMouse();
+		}
+		return 0L;
+	}
+
 	if (uMsg == WM_TIMER)
 	{
 		int timerId = (int)wParam;
@@ -167,16 +181,15 @@ void CMainWindow::OnItemSelectEvent(TNotifyUI& msg)
 
 void CMainWindow::OnSelectChangeEvent(TNotifyUI& msg)
 {
+	COptionUI* control = (COptionUI*)msg.pSender;
+	control->SetBkImage(control->IsSelected() ? L"option_check.png" : L"option_uncheck.png");
+
 	if (!m_manualTrigger)
 	{
 		return;
 	}
 
-	std::wstring controlName = msg.pSender->GetName();
-	if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
-	{
-		SetSensorSettingToMouse();
-	}
+	PostMessage(WM_SELECT_CHANGE, 0, (LPARAM)msg.pSender);
 }
 
 void CMainWindow::OnWindowInit(TNotifyUI& msg)
@@ -207,8 +220,7 @@ void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 	{
 		if (m_waitingWindow)
 		{
-			m_waitingWindow->SetSuccess(true);
-			m_waitingWindow->Close();
+			m_waitingWindow->SetSuccess(true);			
 		}
 	}
 	else if (package.m_commandId == 0xd3)
@@ -401,11 +413,7 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	{
 		m_clickedKeyBtn = msg.pSender;
 		PopupKeyMenu(msg.pSender);
-	}
-	else if (controlName == L"lineRejustOption" || controlName == L"motionSyncOption" || controlName == L"rippleControlOption")
-	{		
-		SetOption((COptionUI*)msg.pSender, ((COptionUI*)msg.pSender)->IsSelected());
-	}
+	}	
 	else if (controlName.Find(L"dpiColorBtn") == 0)
 	{
 		ClickDpiColorBtn((CButtonUI*)msg.pSender);
@@ -452,6 +460,7 @@ void CMainWindow::InitControls()
 {
 	// 睡眠时间下拉框添加选项
 	CComboUI* timeCombo = (CComboUI*)m_PaintManager.FindControl(L"timeCombo");
+	timeCombo->SetMouseWheelEnable(false);
 	for (int i = 1; i <= 8; i++)
 	{
 		CListLabelElementUI* pControl = new CListLabelElementUI();		
@@ -461,6 +470,7 @@ void CMainWindow::InitControls()
 
 	// 灯效设置下拉框添加选项
 	CComboUI* lightCombo = (CComboUI*)m_PaintManager.FindControl(L"lightCombo");
+	lightCombo->SetMouseWheelEnable(false);
 	static std::wstring lightOptionNames[] = { L"关闭", L"呼吸", L"单色常量"};
 	for (int i = 0; i < ARRAYSIZE(lightOptionNames); i++)
 	{
@@ -471,6 +481,7 @@ void CMainWindow::InitControls()
 
 	// 回报率设置下拉框添加选项
 	CComboUI* huibaoCombo = (CComboUI*)m_PaintManager.FindControl(L"huiBaoCombo");
+	huibaoCombo->SetMouseWheelEnable(false);
 	static std::wstring huibaoOptionNames[] = { L"125Hz", L"250Hz", L"500Hz", L"1000Hz", L"2000Hz", L"4000Hz", L"8000Hz" };
 	for (int i = 0; i < ARRAYSIZE(huibaoOptionNames); i++)
 	{
@@ -481,6 +492,7 @@ void CMainWindow::InitControls()
 
 	// LOD设置下拉框添加选项
 	CComboUI* lodCombo = (CComboUI*)m_PaintManager.FindControl(L"lodCombo");
+	lodCombo->SetMouseWheelEnable(false);
 	static std::wstring lodOptionNames[] = { L"1mm", L"2mm"};
 	for (int i = 0; i < ARRAYSIZE(lodOptionNames); i++)
 	{
@@ -908,8 +920,8 @@ void CMainWindow::OnQudouBtnClicked()
 }
 
 void CMainWindow::OnSystemMouseBtnClicked()
-{
-	HWND hwnd = (HWND)ShellExecute(NULL, NULL, L"control", L"mouse", NULL, SW_SHOW);
+{	
+	HWND hwnd = (HWND)ShellExecute(GetHWND(), NULL, L"control", L"mouse", NULL, SW_SHOW);
 	SetForegroundWindow(hwnd);
 }
 
@@ -942,7 +954,9 @@ void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
 	auto it = keyStructs.find(keyIndex);
 	if (it == keyStructs.end())
 	{
-		LOG_ERROR(L"failed to find the key struct of %d", keyIndex);
+		LOG_INFO(L"failed to find the key struct of %d", keyIndex);
+		CMyMessageBox::Show(GetHWND(), L"暂时不支持该按键设置");
+		UpdateControls(SETTING_CATEGORY_KEY);
 		return;
 	}
 
@@ -1375,8 +1389,7 @@ void CMainWindow::SetOption(COptionUI* control, bool check)
 {
 	m_manualTrigger = false;
 	control->Selected(check);
-	m_manualTrigger = true;
-	control->SetBkImage(check ? L"option_check.png" : L"option_uncheck.png");
+	m_manualTrigger = true;	
 }
 
 void CMainWindow::SendSetting(int settingCategory, const CProtocalPackage& package)

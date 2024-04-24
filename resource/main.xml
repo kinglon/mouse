@@ -4,7 +4,7 @@
     <Font id="2" name="微软雅黑" size="14" bold="false" default="true" />
     <Font id="3" name="微软雅黑" size="10" bold="false" />
     
-    <Default name="Combo" value="normalimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot; hotimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot; pushedimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot;" />
+    <Default name="Combo" value="itemfont=&quot;1&quot; normalimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot; hotimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot; pushedimage=&quot;file='combo_normal.bmp' corner='2,2,24,2'&quot;" />
  
     <VerticalLayout name="root" bkcolor="#ff0a0a0a">
         <!--标题栏-->
@@ -95,7 +95,7 @@
                 <HorizontalLayout name="powerPanel" height="70" inset="25,25,0,25" bkcolor="#ff1f1f1f">
                     <Label text="睡眠时间" textcolor="#fff0f0f0" width="70" align="right" font="1"/>
                     <Control width="7" />
-                    <Combo name="timeCombo" height="20" font="1" width="50" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" bkcolor="#ff484848" textcolor="#fff0f0f0" dropboxsize="0,170" itemtextpadding="10,0,0,0"/>
+                    <Combo name="timeCombo" height="20" font="1" width="50" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" bkcolor="#ff484848" textcolor="#fff0f0f0" dropboxsize="0,180" itemtextpadding="10,0,0,0"/>
                     <Control width="7" />
                     <Label text="分钟" textcolor="#fff0f0f0" width="40" align="left" font="1"/>
                 </HorizontalLayout>

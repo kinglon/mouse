@@ -53,7 +53,7 @@ LRESULT CWaitingWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		CProgressUI* progress = (CProgressUI*)m_PaintManager.FindControl(L"progress");
 		int value = progress->GetValue() + 1;
 		progress->SetValue(value);
-		if (value >= progress->GetMaxValue())
+		if (m_success || value >= progress->GetMaxValue())
 		{
 			KillTimer(GetHWND(), TIMERID);
 			Close();

@@ -136,7 +136,7 @@ std::map<int, CKeyStruct>& CKeyMapping::GetKeyStructs()
 	keyStructs[KEY_INDEX_HUOLI] = huoli;
 
 	CKeyStruct sanlianfa = CKeyStruct(0X02, 0X01, 0X00);
-	huoli.m_loopCount = 3;
+	sanlianfa.m_loopCount = 3;
 	keyStructs[KEY_INDEX_SANLIANFA] = sanlianfa;
 
 	keyStructs[KEY_INDEX_LIGHT] = CKeyStruct(0X02, 0X0F, 0XFF);
