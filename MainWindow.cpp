@@ -921,8 +921,7 @@ void CMainWindow::OnQudouBtnClicked()
 
 void CMainWindow::OnSystemMouseBtnClicked()
 {	
-	HWND hwnd = (HWND)ShellExecute(GetHWND(), NULL, L"control", L"mouse", NULL, SW_SHOW);
-	SetForegroundWindow(hwnd);
+	ShellExecute(GetHWND(), NULL, L"control", L"mouse", NULL, SW_SHOW);
 }
 
 void CMainWindow::OnMatchBtnClicked()

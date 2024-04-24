@@ -283,11 +283,11 @@
                     <Control width="9" />
                 </HorizontalLayout>
                 <VerticalLayout name="sensorPanel" height="126" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
-                    <option name="lineRejustOption" width="180" height="20" text="直线修正" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_check.png'" align="left"/>
+                    <option name="lineRejustOption" width="180" height="20" text="直线修正" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_uncheck.png'" align="left"/>
                     <Control height="8" />
                     <option name="motionSyncOption" width="180" height="20" text="Motion Sync" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_uncheck.png'" align="left"/>
                     <Control height="8" />
-                    <option name="rippleControlOption" width="180" height="20" text="Ripple Control" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_check.png'" align="left"/>
+                    <option name="rippleControlOption" width="180" height="20" text="Ripple Control" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_uncheck.png'" align="left"/>
                 </VerticalLayout>
                 
                 <!--配对工具-->

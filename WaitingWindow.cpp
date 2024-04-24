@@ -21,9 +21,9 @@ void CWaitingWindow::InitWindow()
 
 	m_PaintManager.FindControl(L"caption")->SetText(m_caption.c_str());
 	CProgressUI* progress = (CProgressUI*)m_PaintManager.FindControl(L"progress");
-	progress->SetMaxValue(m_waitSeconds);
+	progress->SetMaxValue(m_waitMillSeconds);
 	progress->SetValue(0);
-	SetTimer(GetHWND(), TIMERID, 1000, NULL);
+	SetTimer(GetHWND(), TIMERID, 100, NULL);
 }
 
 void CWaitingWindow::OnFinalMessage(HWND hWnd)
@@ -51,7 +51,7 @@ LRESULT CWaitingWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_TIMER)
 	{
 		CProgressUI* progress = (CProgressUI*)m_PaintManager.FindControl(L"progress");
-		int value = progress->GetValue() + 1;
+		int value = progress->GetValue() + 100;
 		progress->SetValue(value);
 		if (m_success || value >= progress->GetMaxValue())
 		{

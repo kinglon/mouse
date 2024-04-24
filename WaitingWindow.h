@@ -18,7 +18,7 @@ public:
 	void SetSuccess(bool success) { m_success = success; }
 
 	// 设置等待秒数
-	void SetWaitSec(int seconds) { m_waitSeconds = seconds; }
+	void SetWaitSec(int seconds) { m_waitMillSeconds = seconds*1000; }
 
 	// 设置标题
 	void SetCaption(std::wstring caption) { m_caption = caption; }
@@ -34,7 +34,7 @@ protected: //override base
 private:
 	bool m_success = false;
 
-	int m_waitSeconds = 3;
+	int m_waitMillSeconds = 3000;
 
 	std::wstring m_caption;
 };
