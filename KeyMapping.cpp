@@ -195,11 +195,11 @@ std::map<int, CKeyStruct>& CKeyMapping::GetKeyStructs()
 	disable.m_disable = 0x01;
 	keyStructs[KEY_INDEX_DISABLE] = disable;
 
-	keyStructs[KEY_INDEX_OPENAPP] = CKeyStruct(0X04, 0X00, 0X00);
+	keyStructs[KEY_INDEX_OPENAPP] = CKeyStruct(0X04, 0X11, 0X11);
 
-	keyStructs[KEY_INDEX_OPENWEB] = CKeyStruct(0X05, 0X00, 0X00);
+	keyStructs[KEY_INDEX_OPENWEB] = CKeyStruct(0X05, 0X11, 0X22);
 
-	keyStructs[KEY_INDEX_ENTERTEXT] = CKeyStruct(0X06, 0X00, 0X00);
+	keyStructs[KEY_INDEX_ENTERTEXT] = CKeyStruct(0X06, 0X11, 0X33);
 
 	return keyStructs;
 }

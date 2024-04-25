@@ -1,9 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window caption="0,0,0,30" size="540,170" mininfo="540,170" maxinfo="540,170">
-    <Font id="1" name="微软雅黑" size="12" bold="false"  />
-    <Font id="2" name="微软雅黑" size="14" bold="false" default="true" />
-    <Font id="3" name="微软雅黑" size="10" bold="false" />
- 
+<Window caption="0,0,0,30" size="540,170" mininfo="540,170" maxinfo="540,170"> 
     <VerticalLayout name="root" bkcolor="#ff262626" bordercolor="#ffbd220d" bordersize="1">
         <!--标题栏-->
         <HorizontalLayout height="30" bkcolor="#ffbd220d">            

@@ -216,11 +216,11 @@ void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 	}
 
 	// 设置鼠标参数成功、重置参数成功
-	if (package.m_commandId == 0xd1 || package.m_commandId == 0xd4)
+	if (package.m_commandId == 0xd1 || package.m_commandId == 0xd2 || package.m_commandId == 0xd4)
 	{
 		if (m_waitingWindow)
 		{
-			m_waitingWindow->SetSuccess(true);			
+			m_waitingWindow->SetSuccess(true);
 		}
 	}
 	else if (package.m_commandId == 0xd3)
@@ -921,7 +921,19 @@ void CMainWindow::OnQudouBtnClicked()
 
 void CMainWindow::OnSystemMouseBtnClicked()
 {	
-	ShellExecute(GetHWND(), NULL, L"control", L"mouse", NULL, SW_SHOW);
+	ShellExecute(NULL, NULL, L"control", L"mouse", NULL, SW_SHOW);
+
+	// 鼠标属性窗口总是在后面，特殊处理，把它带到前面来
+	for (int i = 0; i < 20; i++)
+	{
+		Sleep(100);
+		HWND hWnd = FindWindow(NULL, L"鼠标 属性");
+		if (hWnd != NULL)
+		{
+			BringWindowToTop(hWnd);
+			break;
+		}
+	}
 }
 
 void CMainWindow::OnMatchBtnClicked()
@@ -980,6 +992,10 @@ void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
 	CProtocalPackage package;
 	package.m_reportId = 0xa5;
 	package.m_commandId = 0xd1;
+	if (keyIndex == KEY_INDEX_OPENAPP || keyIndex == KEY_INDEX_OPENWEB || keyIndex == KEY_INDEX_ENTERTEXT)
+	{
+		package.m_commandId = 0xd2;
+	}
 	package.m_tlvs.push_back(tlv);
 
 	// 发送协议包
