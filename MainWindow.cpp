@@ -290,20 +290,6 @@ void CMainWindow::OnMenuCommand(int commandId)
 void CMainWindow::OnClickEvent(TNotifyUI& msg)
 {
 	auto& controlName = msg.pSender->GetName();
-
-	// 右侧设置面板是分组面板，只显示其中一个，所以显示前先关闭所有
-	static std::wstring rightSettingButtons[] = \
-		{L"dpiHeadBtn", L"lightHeadBtn", L"huiBaoHeadBtn", L"lodHeadBtn", L"qudouHeadBtn", L"systemSettingHeadBtn", L"sensorHeadBtn",\
-		 L"matchHeadBtn"};
-	for (auto& btn : rightSettingButtons)
-	{
-		if (controlName == btn.c_str())
-		{
-			CloseRightSettingPannels();
-			break;
-		}
-	}
-
 	if (controlName == L"minBtn")
 	{
 		::ShowWindow(GetHWND(), SW_MINIMIZE);
@@ -314,99 +300,155 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	}
 	else if (controlName == L"keyHeadBtn")
 	{
-		m_PaintManager.FindControl(L"keyPanel")->SetVisible(true);
-		UpdateKeyPanel();
-	}
-	else if (controlName == L"keyHideBtn")
-	{
-		m_PaintManager.FindControl(L"keyPanel")->SetVisible(false);
-	}
+		CControlUI* keyPanel = m_PaintManager.FindControl(L"keyPanel");
+		if (!keyPanel->IsVisible())
+		{			
+			keyPanel->SetVisible(true);
+			UpdateKeyPanel();
+		}
+		else
+		{
+			keyPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, keyPanel->IsVisible());
+	}	
 	else if (controlName == L"batteryHeadBtn")
 	{
-		m_PaintManager.FindControl(L"batteryPanel")->SetVisible(true);
-	}
-	else if (controlName == L"batteryHideBtn")
-	{
-		m_PaintManager.FindControl(L"batteryPanel")->SetVisible(false);
+		CControlUI* batteryPanel = m_PaintManager.FindControl(L"batteryPanel");
+		batteryPanel->SetVisible(!batteryPanel->IsVisible());
+		SetPanelHeadBkImage(msg.pSender, batteryPanel->IsVisible());
 	}
 	else if (controlName == L"powerHeadBtn")
 	{
-		m_PaintManager.FindControl(L"powerPanel")->SetVisible(true);
-		UpdatePowerPannel();
-	}
-	else if (controlName == L"powerHideBtn")
-	{
-		m_PaintManager.FindControl(L"powerPanel")->SetVisible(false);
-	}
+		CControlUI* powerPanel = m_PaintManager.FindControl(L"powerPanel");
+		if (!powerPanel->IsVisible())
+		{
+			powerPanel->SetVisible(true);
+			UpdatePowerPannel();
+		}
+		else
+		{
+			powerPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, powerPanel->IsVisible());
+	}	
 	else if (controlName == L"dpiHeadBtn")
 	{
-		m_PaintManager.FindControl(L"dpiPanel")->SetVisible(true);
-		UpdateDpiPanel();
-	}
-	else if (controlName == L"dpiHideBtn")
-	{
-		m_PaintManager.FindControl(L"dpiPanel")->SetVisible(false);
+		CControlUI* dpiPanel = m_PaintManager.FindControl(L"dpiPanel");
+		if (!dpiPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			dpiPanel->SetVisible(true);
+			UpdateDpiPanel();
+		}
+		else
+		{
+			dpiPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, dpiPanel->IsVisible());
 	}
 	else if (controlName == L"lightHeadBtn")
 	{
-		m_PaintManager.FindControl(L"lightPanel")->SetVisible(true);
-		UpdateLightPanel();
-	}
-	else if (controlName == L"lightHideBtn")
-	{
-		m_PaintManager.FindControl(L"lightPanel")->SetVisible(false);
+		CControlUI* lightPanel = m_PaintManager.FindControl(L"lightPanel");
+		if (!lightPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			lightPanel->SetVisible(true);
+			UpdateLightPanel();
+		}
+		else
+		{
+			lightPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, lightPanel->IsVisible());
 	}
 	else if (controlName == L"huiBaoHeadBtn")
 	{
-		m_PaintManager.FindControl(L"huiBaoPanel")->SetVisible(true);
-		UpdateHuibaoPanel();
-	}
-	else if (controlName == L"huiBaoHideBtn")
-	{
-		m_PaintManager.FindControl(L"huiBaoPanel")->SetVisible(false);
+		CControlUI* huiBaoPanel = m_PaintManager.FindControl(L"huiBaoPanel");
+		if (!huiBaoPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			huiBaoPanel->SetVisible(true);
+			UpdateHuibaoPanel();
+		}
+		else
+		{
+			huiBaoPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, huiBaoPanel->IsVisible());
 	}
 	else if (controlName == L"lodHeadBtn")
 	{
-		m_PaintManager.FindControl(L"lodPanel")->SetVisible(true);
-		UpdateLodPanel();
-	}
-	else if (controlName == L"lodHideBtn")
-	{
-		m_PaintManager.FindControl(L"lodPanel")->SetVisible(false);
+		CControlUI* lodPanel = m_PaintManager.FindControl(L"lodPanel");
+		if (!lodPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			lodPanel->SetVisible(true);
+			UpdateLodPanel();
+		}
+		else
+		{
+			lodPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, lodPanel->IsVisible());
 	}
 	else if (controlName == L"qudouHeadBtn")
 	{
-		m_PaintManager.FindControl(L"qudouPanel")->SetVisible(true);
-		UpdateQudouPanel();
-	}
-	else if (controlName == L"qudouHideBtn")
-	{
-		m_PaintManager.FindControl(L"qudouPanel")->SetVisible(false);
+		CControlUI* qudouPanel = m_PaintManager.FindControl(L"qudouPanel");
+		if (!qudouPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			qudouPanel->SetVisible(true);
+			UpdateQudouPanel();
+		}
+		else
+		{
+			qudouPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, qudouPanel->IsVisible());
 	}
 	else if (controlName == L"systemSettingHeadBtn")
 	{
-		m_PaintManager.FindControl(L"systemSettingPanel")->SetVisible(true);
-	}
-	else if (controlName == L"systemSettingHideBtn")
-	{
-		m_PaintManager.FindControl(L"systemSettingPanel")->SetVisible(false);
+		CControlUI* systemSettingPanel = m_PaintManager.FindControl(L"systemSettingPanel");
+		if (!systemSettingPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			systemSettingPanel->SetVisible(true);
+		}
+		else
+		{
+			systemSettingPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, systemSettingPanel->IsVisible());
 	}
 	else if (controlName == L"sensorHeadBtn")
 	{
-		m_PaintManager.FindControl(L"sensorPanel")->SetVisible(true);
-		UpdateSensorPanel();
-	}
-	else if (controlName == L"sensorHideBtn")
-	{
-		m_PaintManager.FindControl(L"sensorPanel")->SetVisible(false);
+		CControlUI* sensorPanel = m_PaintManager.FindControl(L"sensorPanel");
+		if (!sensorPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			sensorPanel->SetVisible(true);
+			UpdateSensorPanel();
+		}
+		else
+		{
+			sensorPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, sensorPanel->IsVisible());
 	}
 	else if (controlName == L"matchHeadBtn")
 	{
-		m_PaintManager.FindControl(L"matchPanel")->SetVisible(true);
-	}
-	else if (controlName == L"matchHideBtn")
-	{
-		m_PaintManager.FindControl(L"matchPanel")->SetVisible(false);
+		CControlUI* matchPanel = m_PaintManager.FindControl(L"matchPanel");
+		if (!matchPanel->IsVisible())
+		{
+			CloseRightSettingPannels();
+			matchPanel->SetVisible(true);
+		}
+		else
+		{
+			matchPanel->SetVisible(false);
+		}
+		SetPanelHeadBkImage(msg.pSender, matchPanel->IsVisible());
 	}
 	else if (controlName == L"firstKeyBtn" || controlName == L"secondKeyBtn" || controlName == L"thirdKeyBtn" || \
 		controlName == L"fouthKeyBtn" || controlName == L"fifthKeyBtn" || controlName == L"sixthKeyBtn")
@@ -447,13 +489,40 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 void CMainWindow::CloseRightSettingPannels()
 {
 	m_PaintManager.FindControl(L"dpiPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"dpiHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"lightPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"lightHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"huiBaoPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"huiBaoHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"lodPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"lodHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"qudouPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"qudouHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"systemSettingPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"systemSettingHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"sensorPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"sensorHeadBtn"), false);
+
 	m_PaintManager.FindControl(L"matchPanel")->SetVisible(false);
+	SetPanelHeadBkImage(m_PaintManager.FindControl(L"matchHeadBtn"), false);
+}
+
+void CMainWindow::SetPanelHeadBkImage(CControlUI* control, bool open)
+{
+	if (open)
+	{
+		control->SetBkImage(L"file='header2_ov.png' corner='5,5,40,5'");
+	}
+	else
+	{
+		control->SetBkImage(L"file='header2_nr.png' corner='5,5,40,5'");
+	}
 }
 
 void CMainWindow::InitControls()

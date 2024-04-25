@@ -45,6 +45,9 @@ private:
 	// 关闭右侧所有的设置面板
 	void CloseRightSettingPannels();
 
+	// 设置面板头背景
+	void SetPanelHeadBkImage(CControlUI* control, bool open);
+
 	// 初始化所有的控件，只调用一次
 	void InitControls();	
 

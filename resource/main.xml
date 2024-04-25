@@ -20,12 +20,8 @@
         <HorizontalLayout inset="33,10,11,0" >
             <!--左边-->
             <VerticalLayout width="250">
-                <!--按键设置-->
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="keyHeadBtn" text="按键设置" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="keyHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <!--按键设置-->                
+                <Button name="keyHeadBtn" height= "25" text="按键设置" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_ov.png' corner='5,5,40,5'"/>
                 <VerticalLayout name="keyPanel" height="190" inset="15,15,15,15" bkcolor="#ff1f1f1f">
                     <HorizontalLayout height="20" >
                         <Label text="1" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
@@ -71,12 +67,8 @@
                 </HorizontalLayout>
                 <Control height="30" />
                 
-                <!--电量-->
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="batteryHeadBtn" text="电量" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="batteryHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <!--电量-->                
+                <Button name="batteryHeadBtn" height= "25" text="电量" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_ov.png' corner='5,5,40,5'"/>
                 <VerticalLayout name="batteryPanel" height="81" inset="15,0,15,5" bkcolor="#ff1f1f1f">
                     <HorizontalLayout width="192" height="76" bkimage="file='battery.png'">
                         <!--Control name="batteryArea" padding="36,16,0,0" width="25" height="50" bkcolor="#ff1f1f1f" /-->
@@ -86,12 +78,8 @@
                 </VerticalLayout>
                 <Control height="15" />
                 
-                <!--电源管理-->
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="powerHeadBtn" text="电源管理" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="powerHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <!--电源管理-->                
+                <Button name="powerHeadBtn" height= "25" text="电源管理" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_ov.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="powerPanel" height="70" inset="25,25,0,25" bkcolor="#ff1f1f1f">
                     <Label text="睡眠时间" textcolor="#fff0f0f0" width="70" align="right" font="1"/>
                     <Control width="7" />
@@ -124,11 +112,7 @@
             <!--右边-->
             <VerticalLayout width="300">
                 <!--DPI设置-->
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="dpiHeadBtn" text="DPI设置" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="dpiHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="dpiHeadBtn" height= "25" text="DPI设置" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="dpiPanel" height="195" inset="20,10,20,10" bkcolor="#ff1f1f1f" visible="false">
                     <VerticalLayout width="35">
                         <Container height="135" padding="13,0,13,0">
@@ -217,44 +201,28 @@
                 
                 <!--灯效设置-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="lightHeadBtn" text="灯效设置" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="lightHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="lightHeadBtn" height= "25" text="灯效设置" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="lightPanel" height="110" inset="40,10,40,10" bkcolor="#ff1f1f1f" visible="false">
                     <Combo name="lightCombo" height="20" font="1" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" textcolor="#fff0f0f0" bkcolor="#ff484848" dropboxsize="0,79" itemtextpadding="10,0,0,0" />
                 </HorizontalLayout>
                 
                 <!--回报率设置-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="huiBaoHeadBtn" text="回报率设置" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="huiBaoHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="huiBaoHeadBtn" height= "25" text="回报率设置" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="huiBaoPanel" height="110" inset="40,10,40,10" bkcolor="#ff1f1f1f" visible="false">
                     <Combo name="huiBaoCombo" height="20" font="1" textpadding="10,0,0,0" text="" bordercolor="#ffa8a8a8" bordersize="1" textcolor="#fff0f0f0" bkcolor="#ff484848" dropboxsize="0,154" itemtextpadding="10,0,0,0"/>
                 </HorizontalLayout>
                 
                 <!--鼠标LOD高度-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="lodHeadBtn" text="鼠标LOD高度" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="lodHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="lodHeadBtn" height= "25" text="鼠标LOD高度" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="lodPanel" height="110" inset="40,10,40,10" bkcolor="#ff1f1f1f" visible="false" bkcolor="#ff484848">
                     <Combo name="lodCombo" height="20" text="" font="1" textpadding="10,0,0,0" bordercolor="#ffa8a8a8" bordersize="1" textcolor="#fff0f0f0" dropboxsize="0,54" itemtextpadding="10,0,0,0"/>
                 </HorizontalLayout>
                 
                 <!--按键去抖时间-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="qudouHeadBtn" text="按键去抖时间" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="qudouHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="qudouHeadBtn" height= "25" text="按键去抖时间" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="qudouPanel" height="75" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
                     <Label text="延时(1ms-30ms)：" textcolor="#fff0f0f0" width="110" align="right" font="1"/>
                     <Edit name="qudouTimeEdit" width="40" height="25" text="1" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="1" bordersize="1" />
@@ -264,11 +232,7 @@
                 
                 <!--鼠标参数设置-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="systemSettingHeadBtn" text="鼠标参数设置" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="systemSettingHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="systemSettingHeadBtn" height= "25" text="鼠标参数设置" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <HorizontalLayout name="systemSettingPanel" height="95" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
                     <Button name="systemSettingBtn" bkimage="file='window_logo.png'" width="45" height="45" />
                     <Control width="10" />
@@ -277,11 +241,7 @@
                 
                 <!--Sensor高阶设定-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="sensorHeadBtn" text="Sensor高阶设定" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="sensorHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="sensorHeadBtn" height= "25" text="Sensor高阶设定" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <VerticalLayout name="sensorPanel" height="126" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
                     <option name="lineRejustOption" width="180" height="20" text="直线修正" textcolor="#fff0f0f0" font="1" textpadding="30,3,0,0" bkimage="file='option_uncheck.png'" align="left"/>
                     <Control height="8" />
@@ -292,11 +252,7 @@
                 
                 <!--配对工具-->
                 <Control height="8" />
-                <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="matchHeadBtn" text="配对工具" textcolor="#fff0f0f0" align="left" textpadding="10,4,0,0" />
-                    <Button name="matchHideBtn" width="17" height="17" padding="0,7,0,6" normalimage="file='minimize_button.png'" hotimage="file='minimize_button.png'" pushedimage="file='minimize_button.png'" keyboard="false"/>
-                    <Control width="9" />
-                </HorizontalLayout>
+                <Button name="matchHeadBtn" height= "25" text="配对工具" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <VerticalLayout name="matchPanel" height="75" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
                     <Button name="matchBtn" text="配对" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" width="68" height="25" padding="80,0,0,0"/>
                 </VerticalLayout>
