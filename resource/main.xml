@@ -26,44 +26,44 @@
                     <HorizontalLayout height="20" >
                         <Label text="1" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="firstKeyBtn" text="左键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="firstKeyBtn" text="左键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="2" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="secondKeyBtn" text="右键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="secondKeyBtn" text="右键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="3" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="thirdKeyBtn" text="中键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="thirdKeyBtn" text="中键" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="4" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="fouthKeyBtn" text="前进" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="fouthKeyBtn" text="前进" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="5" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="fifthKeyBtn" text="后退" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="fifthKeyBtn" text="后退" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                     <Control height="8" />
                     <HorizontalLayout height="20" >
                         <Label text="6" bordercolor="#ffa8a8a8" textcolor="#fff0f0f0" width="20" bordersize="1" align="center" font="1"/>
                         <Control width="10" />
-                        <Button name="sixthKeyBtn" text="DPI切换" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" />
+                        <Button name="sixthKeyBtn" text="DPI切换" textcolor="#fff0f0f0" textcolor="#fff0f0f0" bkcolor="#ff484848" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" font="1" />
                     </HorizontalLayout>
                 </VerticalLayout>                
                 
                 <!--宏管理器-->
                 <Control height="30" />
                 <HorizontalLayout height="30" bkcolor="#ff484848" bordercolor="#ffa8a8a8" bordersize="1" >
-                    <Button name="macroHeadBtn" text="宏管理器" textcolor="#fff0f0f0" align="center" />                    
+                    <Button name="macroHeadBtn" text="宏管理器" textcolor="#fff0f0f0" align="center" normalimage="file='button1_nr.png' corner='5,5,5,5'" hotimage="file='button1_ov.png' corner='5,5,5,5'" pushedimage="file='button1_ov.png' corner='5,5,5,5'" />                    
                 </HorizontalLayout>
                 <Control height="30" />
                 
@@ -91,7 +91,7 @@
                 <!--配置、驱动版本-->
                 <Control />
                 <HorizontalLayout height="24">
-                    <Button name="settingBtn" text="配置" width="75" bkcolor="#ff484848" textcolor="#fff0f0f0" />
+                    <Button name="settingBtn" text="配置" width="75" bkcolor="#ff484848" textcolor="#fff0f0f0" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" />
                     <Label text="驱动版本：" textcolor="#fff0f0f0" width="80" align="right" font="1"/>
                     <Label name="driverVerson" text="" textcolor="#fff0f0f0" align="left" font="1"/>
                 </HorizontalLayout>
@@ -227,7 +227,7 @@
                     <Label text="延时(1ms-30ms)：" textcolor="#fff0f0f0" width="110" align="right" font="1"/>
                     <Edit name="qudouTimeEdit" width="40" height="25" text="1" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="1" bordersize="1" />
                     <Control width="10" />
-                    <Button name="qudouBtn" text="修改" textcolor="#fff0f0f0" bkcolor="#ff484848" height="25" font="1" />
+                    <Button name="qudouBtn" text="修改" textcolor="#fff0f0f0" bkcolor="#ff484848" height="25" font="1" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" />
                 </HorizontalLayout>
                 
                 <!--鼠标参数设置-->
@@ -254,14 +254,14 @@
                 <Control height="8" />
                 <Button name="matchHeadBtn" height= "25" text="配对工具" textcolor="#fff0f0f0" align="left" textpadding="10,1,0,0" bkimage="file='header2_nr.png' corner='5,5,40,5'"/>
                 <VerticalLayout name="matchPanel" height="75" inset="40,25,40,25" bkcolor="#ff1f1f1f" visible="false">
-                    <Button name="matchBtn" text="配对" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" width="68" height="25" padding="80,0,0,0"/>
+                    <Button name="matchBtn" text="配对" textcolor="#fff0f0f0" bkcolor="#ff484848" font="1" width="68" height="25" padding="80,0,0,0" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" />
                 </VerticalLayout>
                 
                 <!--重置-->
                 <Control />
                 <HorizontalLayout height="24">
                     <Control />
-                    <Button name="resetBtn" text="重置" width="75" bkcolor="#ff484848" textcolor="#fff0f0f0" />
+                    <Button name="resetBtn" text="重置" width="75" bkcolor="#ff484848" textcolor="#fff0f0f0" normalimage="file='button2_nr.png' corner='5,5,5,5'" hotimage="file='button2_ov.png' corner='5,5,5,5'" pushedimage="file='button2_ov.png' corner='5,5,5,5'" />
                 </HorizontalLayout>
                 <Control height="15" />
             </VerticalLayout>                     
