@@ -35,6 +35,7 @@ private:
 	void OnItemSelectEvent(TNotifyUI& msg);
 	void OnSelectChangeEvent(TNotifyUI& msg);
 	void OnWindowInit(TNotifyUI& msg);
+	bool OnEvent(void* event);
 
 	// 接收到鼠标的数据
 	void OnMouseDataArrive(const unsigned char* data, int dataLength);

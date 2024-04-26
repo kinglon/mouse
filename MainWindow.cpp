@@ -44,6 +44,7 @@
 #define TASKID_GET_MOUSE_SETTING		1
 #define TASKID_GET_BATTERY				2
 
+static std::wstring keyBtnNames[] = { L"firstKeyBtn", L"secondKeyBtn", L"thirdKeyBtn", L"fouthKeyBtn", L"fifthKeyBtn", L"sixthKeyBtn" };
 
 CMainWindow::CMainWindow()
 {
@@ -202,6 +203,37 @@ void CMainWindow::OnWindowInit(TNotifyUI& msg)
 	SetTimer(GetHWND(), TIMERID_RUNTASKPOOL, 3000, NULL);
 }
 
+bool CMainWindow::OnEvent(void* event2)
+{	
+	TEventUI* event = (TEventUI*)event2;
+	if (event->Type == UIEVENT_MOUSEENTER)
+	{
+		for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
+		{
+			if (event->pSender->GetName() == keyBtnNames[i].c_str())
+			{
+				std::wstring number_control_name = std::wstring(L"number") + std::to_wstring(i + 1);
+				m_PaintManager.FindControl(number_control_name.c_str())->SetVisible(true);
+				break;
+			}
+		}
+	}
+	else if (event->Type == UIEVENT_MOUSELEAVE)
+	{
+		for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
+		{
+			if (event->pSender->GetName() == keyBtnNames[i].c_str())
+			{
+				std::wstring number_control_name = std::wstring(L"number") + std::to_wstring(i + 1);
+				m_PaintManager.FindControl(number_control_name.c_str())->SetVisible(false);
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
 void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 {
 	CProtocalPackage package;
@@ -260,7 +292,6 @@ void CMainWindow::OnMenuCommand(int commandId)
 	{
 		return;
 	}
-	static std::wstring keyBtnNames[] = { L"firstKeyBtn", L"secondKeyBtn", L"thirdKeyBtn", L"fouthKeyBtn", L"fifthKeyBtn", L"sixthKeyBtn" };
 	int keyNum = -1;
 	for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
 	{
@@ -527,6 +558,13 @@ void CMainWindow::SetPanelHeadBkImage(CControlUI* control, bool open)
 
 void CMainWindow::InitControls()
 {
+	// 监听按键按钮事件
+	for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
+	{
+		CButtonUI* keyBtn = (CButtonUI*)m_PaintManager.FindControl(keyBtnNames[i].c_str());
+		keyBtn->OnEvent += CDelegate<CMainWindow, CMainWindow>(this, &CMainWindow::OnEvent);
+	}
+
 	// 睡眠时间下拉框添加选项
 	CComboUI* timeCombo = (CComboUI*)m_PaintManager.FindControl(L"timeCombo");
 	timeCombo->SetMouseWheelEnable(false);

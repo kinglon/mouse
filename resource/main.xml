@@ -103,7 +103,14 @@
                 <Control />
                 <HorizontalLayout height="604">
                     <Control />
-                    <Control width="521" height="604" bkimage="file='mouse.png'" />
+                    <Container width="521" height="604" bkimage="file='mouse.png'" >
+                        <Control name="number1" visible="false" pos="180,220,0,0" width="26" height="26" float="true" bkimage="file='number1.png'" />
+                        <Control name="number2" visible="false" pos="296,188,0,0" width="26" height="26" float="true" bkimage="file='number2.png'" />
+                        <Control name="number3" visible="false" pos="237,223,0,0" width="26" height="26" float="true" bkimage="file='number3.png'" />
+                        <Control name="number4" visible="false" pos="130,310,0,0" width="26" height="26" float="true" bkimage="file='number4.png'" />
+                        <Control name="number5" visible="false" pos="130,350,0,0" width="26" height="26" float="true" bkimage="file='number5.png'" />
+                        <Control name="number6" visible="false" pos="233,284,0,0" width="26" height="26" float="true" bkimage="file='number6.png'" />
+                    </Container>
                     <Control />
                 </HorizontalLayout>
                 <Control />
