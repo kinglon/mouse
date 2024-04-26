@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window caption="0,0,0,30" size="540,170" mininfo="540,170" maxinfo="540,170"> 
-    <VerticalLayout name="root" bkcolor="#ff272525" bordercolor="#ffbb220a" bordersize="1">
+<Window caption="0,0,0,20" size="540,160" mininfo="540,160" maxinfo="540,160"> 
+    <VerticalLayout name="root" bkimage="file='Frame_common.bmp' corner='16,33,5,5'">        
         <!--标题栏-->
-        <HorizontalLayout height="30" bkcolor="#ffbb220a"> 
-            <Label name="caption" text="配置鼠标中" textcolor="#fff0f0f0" padding="10,0,0,0" />
+        <HorizontalLayout height="20"> 
+            <Label name="caption" text="配置鼠标中" textcolor="#fff0f0f0" textpadding="10,0,0,0" font="1" valign="center"/>
         </HorizontalLayout>
         
         <!--进度条-->

@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window caption="0,0,0,30" size="540,170" mininfo="540,170" maxinfo="540,170"> 
-    <VerticalLayout name="root" bkcolor="#ff262626" bordercolor="#ffbd220d" bordersize="1">
+<Window caption="0,0,0,20" size="540,160" mininfo="540,160" maxinfo="540,160"> 
+    <Default name="Button" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; normalimage=&quot;file='button2_nr.png' corner='5,5,5,5'&quot; hotimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot; pushedimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot;" />
+    
+    <VerticalLayout name="root" bkimage="file='Frame_common.bmp' corner='16,33,5,5'">
         <!--标题栏-->
-        <HorizontalLayout height="30" bkcolor="#ffbd220d">            
-        </HorizontalLayout>
+        <Control height="20" />
         
         <VerticalLayout inset="20,20,20,20">
             <!--消息内容-->
@@ -14,9 +15,9 @@
             <!--确定/取消按钮-->
             <HorizontalLayout>
                 <Control />
-                <Button name="okBtn" text="确定" width = "120" textcolor="#ffb4b4b4" bkcolor="#ff393939" height="30" />
+                <Button name="okBtn" text="确定" width = "120" height="30" />
                 <HorizontalLayout name="cancelArea" visible="false" width="140">
-                    <Button name="cancelBtn" text="取消" width = "120" padding="20,0,0,0" textcolor="#ffb4b4b4" bkcolor="#ff393939" height="30" />
+                    <Button name="cancelBtn" text="取消" width = "120" padding="20,0,0,0" height="30" />
                 </HorizontalLayout>
             </HorizontalLayout>
         </VerticalLayout>
