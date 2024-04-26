@@ -85,6 +85,18 @@ LPCTSTR CComboWnd::GetWindowClassName() const
 
 void CComboWnd::OnFinalMessage(HWND hWnd)
 {
+	TListInfoUI* pInfo = m_pOwner->GetListInfo();
+	if (pInfo)
+	{
+		pInfo->diBk.pImageInfo = nullptr;
+		pInfo->diBk.bLoaded = false;
+		pInfo->diSelected.pImageInfo = nullptr;
+		pInfo->diSelected.bLoaded = false;
+		pInfo->diHot.pImageInfo = nullptr;
+		pInfo->diHot.bLoaded = false;
+		pInfo->diDisabled.pImageInfo = nullptr;
+		pInfo->diDisabled.bLoaded = false;
+	}
     m_pOwner->m_pWindow = NULL;
     m_pOwner->m_uButtonState &= ~ UISTATE_PUSHED;
     m_pOwner->Invalidate();
