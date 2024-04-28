@@ -48,7 +48,7 @@ static std::wstring keyBtnNames[] = { L"firstKeyBtn", L"secondKeyBtn", L"thirdKe
 
 CMainWindow::CMainWindow()
 {
-	m_keyMenu = LoadMenu(GetModuleHandle(NULL), MAKEINTRESOURCE(IDR_KEY_MENU));
+	InitKeyMenu();	
 }
 
 CMainWindow::~CMainWindow()
@@ -94,6 +94,27 @@ LRESULT CMainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		// 禁止双击放大窗口
 		return 0L;
+	}
+
+	if (uMsg == WM_MEASUREITEM)
+	{		
+		MEASUREITEMSTRUCT* lpMeasureItem = (MEASUREITEMSTRUCT*)lParam;
+		if (lpMeasureItem->CtlType == ODT_MENU)
+		{
+			lpMeasureItem->itemWidth = 130;
+			lpMeasureItem->itemHeight = 25;
+			return 0L;
+		}
+	}
+
+	if (uMsg == WM_DRAWITEM)
+	{
+		LPDRAWITEMSTRUCT dis = (LPDRAWITEMSTRUCT)lParam;
+		if (dis->CtlType == ODT_MENU)
+		{
+			OnDrawItem(dis);
+			return 0L;
+		}
 	}
 
 	if (uMsg == WM_COMMAND && HIWORD(wParam) == 0)
@@ -554,6 +575,104 @@ void CMainWindow::SetPanelHeadBkImage(CControlUI* control, bool open)
 	{
 		control->SetBkImage(L"file='header2_nr.png' corner='5,5,40,5'");
 	}
+}
+
+void CMainWindow::InitKeyMenu()
+{
+	m_keyMenu = LoadMenu(GetModuleHandle(NULL), MAKEINTRESOURCE(IDR_KEY_MENU));
+
+	// 设置菜单背景色
+	static HBRUSH brush = CreateSolidBrush(RGB(56, 56, 56));	
+	MENUINFO mi;
+	mi.cbSize = sizeof(MENUINFO);
+	mi.fMask = MIM_BACKGROUND;
+	mi.hbrBack = brush;
+
+	HMENU firstLayerMenu = GetSubMenu(m_keyMenu, 0);
+	SetMenuInfo(firstLayerMenu, &mi);
+
+	// 设置所有子菜单为自绘
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_FTYPE;
+	mii.fType = MFT_OWNERDRAW;
+	
+	int firstLayerMenuCount = GetMenuItemCount(firstLayerMenu);	
+	for (int i = 0; i < firstLayerMenuCount; i++)
+	{
+		SetMenuItemInfo(firstLayerMenu, i, TRUE, &mii);
+		HMENU currentMenu = GetSubMenu(firstLayerMenu, i);
+		SetMenuInfo(currentMenu, &mi);
+		int currentMenuCount = GetMenuItemCount(currentMenu);
+		for (int j = 0; j < currentMenuCount; j++)
+		{
+			SetMenuItemInfo(currentMenu, j, TRUE, &mii);
+		}
+	}
+}
+
+void CMainWindow::OnDrawItem(LPDRAWITEMSTRUCT lpdis)
+{
+	Graphics graphics(lpdis->hDC);
+
+	// 根据菜单状态获取背景图
+	std::wstring bgFilePath = CImPath::GetSoftInstallPath() + CResourceUtil::GetSkinFolder();
+	bool selected = (lpdis->itemState & ODS_SELECTED);
+	if (selected)
+	{
+		bgFilePath += L"button2_ov.png";
+	}
+	else
+	{		
+		bgFilePath += L"button2_nr.png";
+	}
+
+	Gdiplus::Bitmap bgImage(bgFilePath.c_str());
+	if (bgImage.GetLastStatus() != Gdiplus::Ok)
+	{
+		LOG_ERROR(L"failed to load menu bg image, path is %s", bgFilePath.c_str());
+		return;
+	}
+
+	// 等比例画背景图
+	Gdiplus::Rect destRect;
+	destRect.X = lpdis->rcItem.left;
+	destRect.Y = lpdis->rcItem.top;
+	destRect.Width = lpdis->rcItem.right - lpdis->rcItem.left;
+	destRect.Height = lpdis->rcItem.bottom - lpdis->rcItem.top;
+	graphics.DrawImage(&bgImage, destRect);
+
+	// 获取菜单文本
+	wchar_t text[MAX_PATH] = {0};
+	MENUITEMINFO menuItemInfo;
+	menuItemInfo.cbSize = sizeof(MENUITEMINFO);
+	menuItemInfo.fMask = MIIM_STRING;
+	menuItemInfo.cch = MAX_PATH;
+	menuItemInfo.dwTypeData = text;
+	if (!GetMenuItemInfo((HMENU)lpdis->hwndItem, lpdis->itemID, FALSE, &menuItemInfo))
+	{
+		LOG_ERROR(L"failed to call GetMenuItemInfo, error is %d", GetLastError());
+		return;
+	}	
+
+	if (wcslen(text) == 0)
+	{
+		return;
+	}
+
+	// 画文本
+	Gdiplus::Color textColor;
+	textColor.SetFromCOLORREF(RGB(0xf0, 0xf0, 0xf0));
+	Gdiplus::SolidBrush textBrush(textColor);
+	
+	Gdiplus::Font textFont(L"微软雅黑", 12, FontStyleRegular, UnitPixel);
+	Gdiplus::StringFormat stringFormat;
+	stringFormat.SetAlignment(Gdiplus::StringAlignment::StringAlignmentNear);
+	stringFormat.SetLineAlignment(Gdiplus::StringAlignment::StringAlignmentCenter);
+
+	Gdiplus::RectF layoutRect((Gdiplus::REAL)lpdis->rcItem.left + 30, (Gdiplus::REAL)lpdis->rcItem.top,
+		(Gdiplus::REAL)(lpdis->rcItem.right - lpdis->rcItem.left), (Gdiplus::REAL)(lpdis->rcItem.bottom - lpdis->rcItem.top));
+	graphics.DrawString(text, -1, &textFont, layoutRect, &stringFormat, &textBrush);
 }
 
 void CMainWindow::InitControls()

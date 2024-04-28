@@ -5,8 +5,12 @@
 #include "DumpUtil.h"
 #include "ImPath.h"
 #include "SettingManager.h"
+#include <gdiplus.h>
 
+using namespace Gdiplus;
 using namespace std;
+
+#pragma comment(lib, "gdiplus.lib")
 
 CLogUtil* g_dllLog = nullptr;
 
@@ -60,6 +64,11 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	{
 		return FALSE;
 	}
+
+	// Initialize GDI+
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
 	//≥ı ºªØDuilibø‚
 	CPaintManagerUI::SetInstance(hInstance);

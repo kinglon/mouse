@@ -49,6 +49,11 @@ private:
 	// 设置面板头背景
 	void SetPanelHeadBkImage(CControlUI* control, bool open);
 
+	// 初始化按键菜单，设置为自绘
+	void InitKeyMenu();
+
+	void OnDrawItem(LPDRAWITEMSTRUCT lpdis);
+
 	// 初始化所有的控件，只调用一次
 	void InitControls();	
 
