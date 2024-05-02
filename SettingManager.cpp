@@ -4,6 +4,7 @@
 #include <fstream>
 #include "Utility/ImPath.h"
 #include "Utility/ImCharset.h"
+#include <shlwapi.h>
 
 void CMouseConfig::SetKey(int keyNum, int keyIndex)
 {
@@ -96,6 +97,133 @@ void CSettingManager::Load()
 	}
 
 	LoadMouseConfig(m_currentMouseConfig);
+
+	LoadMacroCmdConfig();
+}
+
+void CSettingManager::LoadMacroCmdConfig()
+{
+	std::wstring strConfFilePath = CImPath::GetConfPath() + L"macro.json";
+	if (!PathFileExists(strConfFilePath.c_str()))
+	{
+		return;
+	}
+
+	std::ifstream inputFile(strConfFilePath);
+	if (!inputFile.is_open())
+	{
+		LOG_ERROR(L"failed to open the macro configure file : %s", strConfFilePath.c_str());
+		return;
+	}
+
+	std::string jsonString;
+	std::string line;
+	while (std::getline(inputFile, line))
+	{
+		jsonString += line;
+	}
+	inputFile.close();
+
+	Json::Value root;
+	Json::CharReaderBuilder builder;
+	Json::CharReader* reader = builder.newCharReader();
+	std::string errors;
+	bool parsingSuccessful = reader->parse(jsonString.c_str(), jsonString.c_str() + jsonString.size(), &root, &errors);
+	delete reader;
+	if (!parsingSuccessful)
+	{
+		LOG_ERROR(L"failed to parse the mouse configure");
+		return;
+	}
+
+	m_macroCmdConfig.clear();
+	for (auto& macro : root["macros"])
+	{
+		CMacroCmd macroCmd;
+		macroCmd.m_name = CImCharset::UTF8ToUnicode(macro["name"].asString().c_str());
+		macroCmd.m_overFlag = macro["over_flag"].asInt();
+		macroCmd.m_loopCount = macro["loop_count"].asInt();
+
+		for (auto& event : macro["events"])
+		{
+			CMacroEvent macroEvent;
+			macroEvent.m_type = event["type"].asInt();
+			if (macroEvent.m_type == 1)
+			{
+				macroEvent.m_vkCode = event["vkcode"].asInt();
+				macroEvent.m_keyFlag = (unsigned char)event["keyflag"].asInt();
+				macroEvent.m_down = event["down"].asBool();
+				macroCmd.m_events.push_back(macroEvent);
+			}
+			else if (macroEvent.m_type == 2)
+			{
+				macroEvent.m_mouseKey = event["mouse_key"].asInt();
+				macroEvent.m_down = event["down"].asBool();
+				macroCmd.m_events.push_back(macroEvent);
+			}
+			else if (macroEvent.m_type == 3)
+			{
+				macroEvent.m_delayMillSec = event["delay"].asInt();
+				macroCmd.m_events.push_back(macroEvent);
+			}
+		}
+
+		m_macroCmdConfig.push_back(macroCmd);
+	}
+}
+
+void CSettingManager::SaveMacroCmdConfig()
+{
+	Json::Value root = Json::objectValue;
+	root["macros"] = Json::arrayValue;
+	for (auto& macro : m_macroCmdConfig)
+	{
+		Json::Value macroValue;
+		macroValue["name"] = CImCharset::UnicodeToUTF8(macro.m_name.c_str());
+		macroValue["over_flag"] = macro.m_overFlag;
+		macroValue["loop_count"] = macro.m_loopCount;
+		macroValue["events"] = Json::arrayValue;
+
+		for (auto& event : macro.m_events)
+		{
+			Json::Value eventValue;
+			eventValue["type"] = event.m_type;
+			if (event.m_type == 1)
+			{
+				eventValue["vkcode"] = event.m_vkCode;
+				eventValue["keyflag"] = event.m_keyFlag;
+				eventValue["down"] = event.m_down;
+				macroValue["events"].append(eventValue);				
+			}
+			else if (event.m_type == 2)
+			{
+				eventValue["mouse_key"] = event.m_mouseKey;
+				eventValue["down"] = event.m_down;
+				macroValue["events"].append(eventValue);
+			}
+			else if (event.m_type == 3)
+			{
+				eventValue["delay"] = event.m_delayMillSec;
+				macroValue["events"].append(eventValue);
+			}
+		}
+
+		root["macros"].append(macroValue);
+	}
+
+	std::wstring strConfFilePath = CImPath::GetConfPath() + L"macro.json";
+	std::ofstream outputFile(strConfFilePath);
+	if (outputFile.is_open())
+	{
+		Json::StreamWriterBuilder writer;
+		std::string jsonString = Json::writeString(writer, root);
+		outputFile << jsonString;
+		outputFile.close();
+	}
+	else
+	{
+		LOG_ERROR(L"failed to save the macro configure file : %s", strConfFilePath.c_str());
+	}
 }
 
 void CSettingManager::LoadMouseConfig(const std::wstring& configName)
@@ -156,6 +284,14 @@ void CSettingManager::LoadMouseConfig(const std::wstring& configName)
 	if (root.isMember("sixthKey"))
 	{
 		m_mouseConfig.m_sixthKey = root["sixthKey"].asInt();
+	}
+
+	if (root.isMember("macro"))
+	{
+		for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_macroCmdNames) && i < root["macro"].size(); i++)
+		{
+			m_mouseConfig.m_macroCmdNames[i] = CImCharset::UTF8ToUnicode(root["macro"][i].asString().c_str());
+		}
 	}
 
 	if (root.isMember("sleepTime"))
@@ -226,6 +362,11 @@ void CSettingManager::SaveMouseConfig(const std::wstring& configName)
 	root["fourthKey"] = m_mouseConfig.m_fourthKey;
 	root["fifthKey"] = m_mouseConfig.m_fifthKey;
 	root["sixthKey"] = m_mouseConfig.m_sixthKey;
+
+	for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_macroCmdNames); i++)
+	{
+		root["macro"].append(CImCharset::UnicodeToUTF8(m_mouseConfig.m_macroCmdNames[i].c_str()));
+	}
 
 	root["currentDpi"] = m_mouseConfig.m_currentDpi;
 	for (auto& item : m_mouseConfig.m_dpiSetting)

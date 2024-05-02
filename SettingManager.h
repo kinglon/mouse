@@ -79,6 +79,9 @@ public:
 	// 第6个按键，默认是DPI切换
 	int m_sixthKey = KEY_INDEX_DPISWITCH;
 
+	// 设置为KEY_INDEX_MACRO时使用，表示按键设置的宏命令名称
+	std::wstring m_macroCmdNames[6];
+
 	// 休眠时间，默认是1分钟
 	int m_sleepTime = 1;
 
@@ -110,6 +113,62 @@ public:
 	bool m_rippleControl = true;
 };
 
+// 宏事件
+class CMacroEvent
+{
+public:
+	// 事件类型, 1 键盘， 2 鼠标， 3延时
+	int m_type = 1;
+
+	// 键盘虚拟按键，键盘事件使用
+	int m_vkCode = 0;	
+
+	// 键盘按键标志，键盘事件使用
+	// 第0-7bit各代表left control, left shift, left alt, left win, right control, right shift, right alt, right win, 1 down, 0 up
+	unsigned char m_keyFlag = 0;
+
+	// 鼠标按键，鼠标事件使用, 1鼠标左键 2鼠标中键 3鼠标右键
+	int m_mouseKey = 1;
+
+	// 标志按下还是放开，键盘和鼠标事件使用
+	bool m_down = true;
+
+	// 延时毫秒数，延时事件使用
+	int m_delayMillSec = 0;
+};
+
+// 宏命令
+class CMacroCmd
+{
+public:
+	// 名字
+	std::wstring m_name;
+
+	// 结束标志，直至循环结束 = 0x00，循环直到按键松开 = 0x01，循环直到任意键按下 = 0x02
+	int m_overFlag = 0;
+
+	// 循环次数，m_overFlag=0时有效
+	int m_loopCount = 1;
+
+	// 事件序列
+	std::vector<CMacroEvent> m_events;
+
+public:
+	// 获取事件数，不包括延时事件
+	int GetEventCount() const
+	{
+		int count = 0;
+		for (auto& event : m_events)
+		{
+			if (event.m_type != 3)
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+};
+
 class CSettingManager
 {
 protected:
@@ -131,8 +190,11 @@ public:
 	// 当前鼠标配置
 	CMouseConfig m_mouseConfig;
 
+	// 宏命令列表
+	std::vector<CMacroCmd> m_macroCmdConfig;
+
 public:
-	// 保存所有配置
+	// 保存所有配置，不包括宏命令列表
 	void Save(bool needSaveMouseConfig);
 
 	// 加载鼠标配置
@@ -141,6 +203,13 @@ public:
 	// 保存鼠标配置，未指定配置名称表示保存到当前的配置
 	void SaveMouseConfig(const std::wstring& configName = L"");
 
+	// 保存宏命令列表配置
+	void SaveMacroCmdConfig();
+
 private:
+	// 加载所有配置
 	void Load();
+
+	// 加载宏命令列表配置
+	void LoadMacroCmdConfig();
 };

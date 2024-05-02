@@ -41,16 +41,16 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	for (const auto& tlv : package.m_tlvs)
 	{
 		tlvDataLength += (int)tlv.m_length;
-	}	
+	}
 
 	int totalDataLength = PACKAGE_FIXED_SIZE + tlvDataLength;
-	if (totalDataLength > OUTPUT_REPORT_LENGTH)
+	if (totalDataLength > 300) // 数据域长度只有一个字节，总长肯定不会超过300
 	{
-		LOG_ERROR(L"the size of the package is greater than %d", OUTPUT_REPORT_LENGTH);
+		LOG_ERROR(L"the size of the package is wrong");
 		return false;
 	}
-	unsigned char* data = new unsigned char[OUTPUT_REPORT_LENGTH];
-	memset(data, 0, OUTPUT_REPORT_LENGTH);
+	unsigned char* data = new unsigned char[totalDataLength];
+	memset(data, 0, totalDataLength);
 
 	// 填充固定域
 	int offset = 0;
@@ -73,8 +73,43 @@ bool CProtocalUtil::SendPackage(const CProtocalPackage& package)
 	data[offset++] = (crc >> 8) & 0xff;
 	data[offset++] = crc & 0xff;
 
-	// 发送
-	bool success = CMouseCommManager::GetInstance()->SendData(data, OUTPUT_REPORT_LENGTH);
+	// 不足64字节直接发送，超过64字节拆包
+	bool success = false;
+	if (totalDataLength <= OUTPUT_REPORT_LENGTH)
+	{
+		unsigned char buffer[OUTPUT_REPORT_LENGTH];
+		memset(buffer, 0, sizeof(buffer));
+		memcpy(buffer, data, totalDataLength);
+		success = CMouseCommManager::GetInstance()->SendData(buffer, OUTPUT_REPORT_LENGTH);
+	}
+	else
+	{
+		// 第一个包完整发送
+		success = CMouseCommManager::GetInstance()->SendData(data, OUTPUT_REPORT_LENGTH);
+		if (success)
+		{
+			for (int i = OUTPUT_REPORT_LENGTH; i < totalDataLength; i += OUTPUT_REPORT_LENGTH - 1)
+			{
+				unsigned char buffer[OUTPUT_REPORT_LENGTH];
+				memset(buffer, 0, sizeof(buffer));
+				buffer[0] = package.m_reportId;  // 第一个字节固定位reportId
+				if (i + OUTPUT_REPORT_LENGTH - 1 <= totalDataLength)
+				{
+					memcpy(&buffer[1], &data[i], OUTPUT_REPORT_LENGTH - 1);
+				}
+				else
+				{
+					memcpy(&buffer[1], &data[i], totalDataLength - i);
+				}
+				success = CMouseCommManager::GetInstance()->SendData(buffer, OUTPUT_REPORT_LENGTH);
+				if (!success)
+				{
+					break;
+				}
+			}
+		}
+	}
+
 	delete[] data;
 
 	return success;

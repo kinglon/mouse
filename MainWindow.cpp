@@ -15,6 +15,9 @@
 #include "ResourceUtil.h"
 #include "MyMessageBox.h"
 #include "DpiLockWindow.h"
+#include "GetOptionWindow.h"
+#include "MacroEventMapping.h"
+#include "MacroWindow.h"
 
 // 设置分类
 #define SETTING_CATEGORY_ALL		0		//所有
@@ -44,7 +47,11 @@
 #define TASKID_GET_MOUSE_SETTING		1
 #define TASKID_GET_BATTERY				2
 
+// 按键控件名字
 static std::wstring keyBtnNames[] = { L"firstKeyBtn", L"secondKeyBtn", L"thirdKeyBtn", L"fouthKeyBtn", L"fifthKeyBtn", L"sixthKeyBtn" };
+
+// 宏定义按键名称
+#define KEY_NAME_MACRO L"宏定义-"
 
 CMainWindow::CMainWindow()
 {
@@ -286,10 +293,32 @@ void CMainWindow::OnMouseDataArrive(const unsigned char* data, int dataLength)
 	}
 }
 
+int CMainWindow::GetKeyIndexByCtrlName(std::wstring ctrlName)
+{
+	int keyNum = -1;
+	for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
+	{
+		if (ctrlName == keyBtnNames[i].c_str())
+		{
+			keyNum = i + 1;
+			break;
+		}
+	}
+
+	return keyNum;
+}
+
 void CMainWindow::OnMenuCommand(int commandId)
 {
 	if (m_clickedKeyBtn == nullptr)
 	{
+		return;
+	}
+
+	// 设置为宏命令，特殊处理
+	if (commandId == ID_KEY_MACRO)
+	{
+		OnMacroMenuCommand();
 		return;
 	}
 
@@ -308,23 +337,18 @@ void CMainWindow::OnMenuCommand(int commandId)
 	}
 
 	// 获取KeyNum
-	std::wstring keyName = CKeyMapping::GetKeyNameByCommandId(commandId);
-	if (keyName.empty())
-	{
-		return;
-	}
-	int keyNum = -1;
-	for (int i = 0; i < ARRAYSIZE(keyBtnNames); i++)
-	{
-		if (m_clickedKeyBtn->GetName() == keyBtnNames[i].c_str())
-		{
-			keyNum = i + 1;
-		}
-	}
+	int keyNum = GetKeyIndexByCtrlName(m_clickedKeyBtn->GetName().GetData());
 	if (keyNum < 1)
 	{
 		return;
 	}
+
+	// 获取按键名称
+	std::wstring keyName = CKeyMapping::GetKeyNameByCommandId(commandId);
+	if (keyName.empty())
+	{
+		return;
+	}	
 
 	// 更改按键名称	
 	m_clickedKeyBtn->SetText(keyName.c_str());
@@ -337,6 +361,50 @@ void CMainWindow::OnMenuCommand(int commandId)
 	else{
 		SetKeyToMouse(keyNum, CKeyMapping::GetKeyIndexByName(keyName));
 	}
+}
+
+void CMainWindow::OnMacroMenuCommand()
+{
+	// 没有任何宏命令，提示它
+	auto& macroCmdConfig = CSettingManager::GetInstance()->m_macroCmdConfig;
+	if (macroCmdConfig.size() == 0)
+	{
+		CMyMessageBox::Show(GetHWND(), L"没有宏可以选择");
+		return;
+	}
+
+	// 选择一个宏
+	std::vector<std::wstring> options;
+	for (auto& macroCmd : macroCmdConfig)
+	{
+		options.push_back(macroCmd.m_name);
+	}
+
+	CGetOptionWindow getOptionWindow;
+	getOptionWindow.SetTitle(L"选择一个宏");
+	getOptionWindow.SetOptions(options);
+	getOptionWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+	getOptionWindow.CenterWindow();
+	if (getOptionWindow.ShowModal() == 0) // 取消
+	{
+		return;
+	}
+	std::wstring macroName = getOptionWindow.GetSelectedOption();
+
+	// 获取KeyNum
+	int keyNum = GetKeyIndexByCtrlName(m_clickedKeyBtn->GetName().GetData());
+	if (keyNum < 1)
+	{
+		return;
+	}
+
+	// 更改按键名称为：宏定义-xxx
+	std::wstring keyName = KEY_NAME_MACRO;
+	keyName += macroName;
+	m_clickedKeyBtn->SetText(keyName.c_str());
+
+	// 发送宏配置给鼠标
+	SetMacroToMouse(keyNum, macroName);
 }
 
 void CMainWindow::OnClickEvent(TNotifyUI& msg)
@@ -535,6 +603,10 @@ void CMainWindow::OnClickEvent(TNotifyUI& msg)
 	else if (controlName == L"systemSettingBtn")
 	{
 		OnSystemMouseBtnClicked();
+	}
+	else if (controlName == L"macroHeadBtn")
+	{
+		OnMacroBtnClicked();
 	}
 }
 
@@ -737,22 +809,71 @@ void CMainWindow::UpdateKeyPanel()
 
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
 	
-	std::wstring keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_firstKey);
+	std::wstring keyName;
+	if (mouseConfig.m_firstKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[0];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_firstKey);
+	}
 	m_PaintManager.FindControl(L"firstKeyBtn")->SetText(keyName.c_str());
 
-	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_secondKey);
+	if (mouseConfig.m_secondKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[1];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_secondKey);
+	}	
 	m_PaintManager.FindControl(L"secondKeyBtn")->SetText(keyName.c_str());
 
-	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_thirdtKey);
+	if (mouseConfig.m_thirdtKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[2];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_thirdtKey);
+	}	
 	m_PaintManager.FindControl(L"thirdKeyBtn")->SetText(keyName.c_str());
 
-	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fourthKey);
+	if (mouseConfig.m_fourthKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[3];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fourthKey);
+	}
 	m_PaintManager.FindControl(L"fouthKeyBtn")->SetText(keyName.c_str());
 
-	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fifthKey);
+	if (mouseConfig.m_fifthKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[4];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fifthKey);
+	}
 	m_PaintManager.FindControl(L"fifthKeyBtn")->SetText(keyName.c_str());
 
-	keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_sixthKey);
+	if (mouseConfig.m_sixthKey == KEY_INDEX_MACRO)
+	{
+		keyName = KEY_NAME_MACRO;
+		keyName += mouseConfig.m_macroCmdNames[5];
+	}
+	else
+	{
+		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_sixthKey);
+	}
 	m_PaintManager.FindControl(L"sixthKeyBtn")->SetText(keyName.c_str());
 }
 
@@ -1162,6 +1283,14 @@ void CMainWindow::OnSystemMouseBtnClicked()
 	}
 }
 
+void CMainWindow::OnMacroBtnClicked()
+{
+	CMacroWindow macroWindow;
+	macroWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+	macroWindow.CenterWindow();
+	macroWindow.ShowModal();
+}
+
 void CMainWindow::OnMatchBtnClicked()
 {
 	// todo by yejinlong，配对功能
@@ -1228,6 +1357,177 @@ void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
 	SendSetting(SETTING_CATEGORY_KEY, package);
 }
 
+void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
+{
+	// 获取宏命令详细配置
+	CMacroCmd* macroCmd = nullptr;
+	for (auto& item : CSettingManager::GetInstance()->m_macroCmdConfig)
+	{
+		if (item.m_name == macroName)
+		{
+			macroCmd = &item;
+			break;
+		}
+	}
+	if (macroCmd == nullptr)
+	{
+		return;
+	}
+
+	// 合并延时事件
+	std::vector<CMacroEvent> newEvents;
+	int delay = 0;
+	for (const auto& event : macroCmd->m_events)
+	{
+		if (event.m_type == 3)
+		{
+			delay += event.m_delayMillSec;
+			continue;
+		}
+		else
+		{
+			CMacroEvent newEvent = event;
+			newEvent.m_delayMillSec = delay;
+			if (newEvent.m_delayMillSec > 65535)
+			{
+				newEvent.m_delayMillSec = 65535;
+			}
+			newEvents.push_back(newEvent);
+			if (newEvents.size() == 48)
+			{
+				break;
+			}
+			delay = 0;
+		}
+	}
+
+	// 构造Value
+	unsigned char tlvData[256];
+	memset(tlvData, 0, sizeof(tlvData));
+	tlvData[0] = (unsigned char)keyNum;  // key num
+	tlvData[1] = (unsigned char)macroCmd->m_loopCount;  // loop count
+	tlvData[2] = (unsigned char)macroCmd->m_overFlag;  // over flag
+	tlvData[3] = (unsigned char)newEvents.size();  // group num
+
+	// 添加按键列表
+	int offset = 4;
+	for (const auto& event : newEvents)
+	{
+		if (event.m_type == 1)  // 键盘按键
+		{			
+			ST_KEY_CODE* keyCode = CMacroEventMapping::GetKeyCodeByVkCode(event.m_vkCode);
+			if (keyCode == nullptr)
+			{
+				LOG_ERROR(L"the vkcode is wrong");
+				return;
+			}
+
+			tlvData[offset] = keyCode->uc_reportID;
+			if (keyCode->uc_reportID == 1)
+			{
+				if (event.m_vkCode == VK_BROWSER_HOME)  // 特殊处理
+				{
+					if (event.m_down)
+					{
+						tlvData[offset + 1] = keyCode->aucCode[0];
+						tlvData[offset + 2] = keyCode->aucCode[1];
+					}
+					else
+					{
+						tlvData[offset + 1] = 0;
+						tlvData[offset + 2] = 0;
+					}
+				}
+				else
+				{
+					tlvData[offset + 1] = event.m_keyFlag;
+					if (event.m_down)
+					{
+						tlvData[offset + 2] = keyCode->aucCode[1];
+					}
+					else
+					{
+						tlvData[offset + 2] = 0;
+					}
+				}
+			}
+			else
+			{
+				if (event.m_down)
+				{
+					tlvData[offset + 1] = keyCode->aucCode[0];
+					tlvData[offset + 2] = keyCode->aucCode[1];
+				}
+				else
+				{
+					tlvData[offset + 1] = 0;
+					tlvData[offset + 2] = 0;
+				}
+			}			
+		}
+		else if (event.m_type == 2)
+		{
+			// 鼠标按键，第一字节为02，第二字节和第三个字节是键值
+			tlvData[offset] = 0x02;
+			if (event.m_down)
+			{
+				if (event.m_mouseKey == 1) // 鼠标左键
+				{
+					tlvData[offset + 1] = 0x01;
+					tlvData[offset + 2] = 0x00;
+				}
+				else if (event.m_mouseKey == 2) // 鼠标中键
+				{
+					tlvData[offset + 1] = 0x04;
+					tlvData[offset + 2] = 0x00;
+				}
+				else if (event.m_mouseKey == 3) // 鼠标右键
+				{
+					tlvData[offset + 1] = 0x02;
+					tlvData[offset + 2] = 0x00;
+				}
+				else
+				{
+					LOG_ERROR(L"the mouse key is wrong");
+					return;
+				}
+			}
+			else
+			{
+				// up 固定为 0x00 0x00
+				tlvData[offset + 1] = 0x00;
+				tlvData[offset + 2] = 0x00;
+			}
+		}
+		else
+		{
+			LOG_ERROR(L"the macro event type is wrong");
+			return;
+		}
+
+		// 第四和第五字节为延时，小端格式
+		tlvData[offset + 3] = (unsigned char)(event.m_delayMillSec & 0xFF);
+		tlvData[offset + 4] = (unsigned char)((event.m_delayMillSec >> 8) & 0xFF);
+
+		offset += 5;
+	}
+
+	// 构造TLV
+	CProtocalTLV tlv;
+	tlv.m_type = 0x4C;
+	tlv.m_length = (unsigned char)(offset+2);
+	memcpy(tlv.m_value, tlvData, offset);
+
+	// 构造协议包
+	CProtocalPackage package;
+	package.m_reportId = 0xa5;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	// 发送协议包
+	SendSetting(SETTING_CATEGORY_KEY, package);
+}
+
 void CMainWindow::SaveSetting(int settingCategory)
 {
 	CMouseConfig& mouseConfig = CSettingManager::GetInstance()->m_mouseConfig;
@@ -1241,12 +1541,30 @@ void CMainWindow::SaveSetting(int settingCategory)
 		{
 			mouseConfig.m_firstKey = index;
 		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_firstKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[0] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+		}
 
 		text = m_PaintManager.FindControl(L"secondKeyBtn")->GetText();
 		index = CKeyMapping::GetKeyIndexByName(text);
 		if (index != -1)
 		{
 			mouseConfig.m_secondKey = index;
+		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_secondKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[1] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
 		}
 
 		text = m_PaintManager.FindControl(L"thirdKeyBtn")->GetText();
@@ -1255,12 +1573,30 @@ void CMainWindow::SaveSetting(int settingCategory)
 		{
 			mouseConfig.m_thirdtKey = index;
 		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_thirdtKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[2] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+		}
 
 		text = m_PaintManager.FindControl(L"fouthKeyBtn")->GetText();
 		index = CKeyMapping::GetKeyIndexByName(text);
 		if (index != -1)
 		{
 			mouseConfig.m_fourthKey = index;
+		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_fourthKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[3] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
 		}
 
 		text = m_PaintManager.FindControl(L"fifthKeyBtn")->GetText();
@@ -1269,12 +1605,30 @@ void CMainWindow::SaveSetting(int settingCategory)
 		{
 			mouseConfig.m_fifthKey = index;
 		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_fifthKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[4] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+		}
 
 		text = m_PaintManager.FindControl(L"sixthKeyBtn")->GetText();
 		index = CKeyMapping::GetKeyIndexByName(text);
 		if (index != -1)
 		{
 			mouseConfig.m_sixthKey = index;
+		}
+		else
+		{
+			// 判断是否为宏命令
+			if (text.find(KEY_NAME_MACRO) == 0)
+			{
+				mouseConfig.m_sixthKey = KEY_INDEX_MACRO;
+				mouseConfig.m_macroCmdNames[5] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
 		}
 	}
 

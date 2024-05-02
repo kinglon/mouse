@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window>
+	<ListContainerElement height="25" padding="2,2,2,2">
+		<HorizontalLayout>
+            <Control name="icon" bkimage="file='macro_down.png'" width="15" padding="0,5,0,5"/>
+            <Control width="2"/>
+            <Label name="content" textcolor="#ffffffff" font="1" />
+        </HorizontalLayout>
+	</ListContainerElement>		
+</Window>

@@ -90,7 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DpiLockWindow.h" />
+    <ClInclude Include="GetOptionWindow.h" />
+    <ClInclude Include="GetTextWindow.h" />
+    <ClInclude Include="GetVkCodeWindow.h" />
     <ClInclude Include="KeyMapping.h" />
+    <ClInclude Include="MacroEventMapping.h" />
+    <ClInclude Include="MacroWindow.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="mouse.h" />
     <ClInclude Include="MouseCommManager.h" />
@@ -112,7 +117,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DpiLockWindow.cpp" />
+    <ClCompile Include="GetOptionWindow.cpp" />
+    <ClCompile Include="GetTextWindow.cpp" />
+    <ClCompile Include="GetVkCodeWindow.cpp" />
     <ClCompile Include="KeyMapping.cpp" />
+    <ClCompile Include="MacroEventMapping.cpp" />
+    <ClCompile Include="MacroWindow.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="mouse.cpp" />
     <ClCompile Include="MouseCommManager.cpp" />

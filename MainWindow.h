@@ -43,6 +43,9 @@ private:
 	// 通过菜单触发的命令
 	void OnMenuCommand(int commandId);
 
+	// 宏命令菜单触发
+	void OnMacroMenuCommand();
+
 	// 关闭右侧所有的设置面板
 	void CloseRightSettingPannels();
 
@@ -74,6 +77,9 @@ private:
 
 	// 颜色对话框处理函数
 	static UINT_PTR WINAPI ColorDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+	// 按控件名称获取按键索引 1-6，未找到返回-1
+	int GetKeyIndexByCtrlName(std::wstring ctrlName);
 
 private:
 	// 运行任务池
@@ -107,6 +113,9 @@ private:
 	// 给鼠标配置按键
 	void SetKeyToMouse(int keyNum, int keyIndex);
 
+	// 给鼠标配置宏
+	void SetMacroToMouse(int keyNum, std::wstring macroName);
+
 	// 给鼠标按键配置DPI锁定
 	void SetDpiLockToMouse(int keyNum, int dpiValue);
 
@@ -132,6 +141,7 @@ private:
 	void OnResetBtnClicked();
 	void OnQudouBtnClicked();
 	void OnSystemMouseBtnClicked();
+	void OnMacroBtnClicked();
 	void OnMatchBtnClicked();
 
 private:

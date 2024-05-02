@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window caption="0,0,0,20" size="620,430" mininfo="620,430" maxinfo="620,430"> 
+    <Default name="Button" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; normalimage=&quot;file='button2_nr.png' corner='5,5,5,5'&quot; hotimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot; pushedimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot;" />
+    
+    <Default name="Label" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; valign=&quot;center&quot; " />
+    
+    <Default name="List" value="vscrollbar=&quot;true&quot; hscrollbar=&quot;false&quot; itemalign=&quot;left&quot; header=&quot;hidden&quot; bordersize=&quot;1&quot; bordercolor=&quot;#ffa3a3a1&quot; bkcolor=&quot;#ff4c4a4d&quot; itemtextcolor=&quot;#ffffffff&quot; itemhottextcolor=&quot;#ffffffff&quot; itemselectedtextcolor=&quot;#ffffffff&quot; itemfont=&quot;1&quot; itemhotbkcolor=&quot;#ffbbbbff&quot; itemselectedbkcolor=&quot;#ffbbbbff&quot;" />
+    
+    <Default name="Option" value="bkimage=&quot;file='radio_nr.png'&quot; hotimage=&quot;file='radio_ov.png'&quot; selectedimage=&quot;file='radio_dn.png'&quot;" />
+    
+    <Default name="Combo" value="font=&quot;1&quot; itemfont=&quot;1&quot; normalimage=&quot;file='combo3_nr.png' corner='2,2,15,2'&quot; hotimage=&quot;file='combo3_ov.png' corner='2,2,15,2'&quot; pushedimage=&quot;file='combo3_ov.png' corner='2,2,15,2'&quot; itembkimage=&quot;file='combo2_nr.png' corner='2,2,2,2'&quot; itemhotimage=&quot;file='combo2_ov.png' corner='2,2,2,2'&quot; textcolor=&quot;#fff0f0f0&quot; itemtextcolor=&quot;#fff0f0f0&quot; itemhottextcolor=&quot;#fff0f0f0&quot; itemselectedtextcolor=&quot;#fff0f0f0&quot; itemalign=&quot;center&quot;"/>
+    
+    <VerticalLayout name="root" bkimage="file='Frame_common.bmp' corner='16,33,5,5'">
+        <!--标题栏-->
+        <HorizontalLayout height="20">
+            <Control />
+            <Button name="closeBtn" padding="0,4,0,0" width="15" normalimage="file='exit_nr.png'" hotimage="file='exit_ov.png'" pushedimage="file='exit_ov.png'"/>
+            <Control width="7"/>
+        </HorizontalLayout>
+        
+        <!--设置区-->
+        <HorizontalLayout inset="25,15,10,15">
+            <!--宏列表-->
+            <VerticalLayout>
+                <Label text="宏列表" height="25"/>
+                <List name="macroList">
+                </List>
+                <Control height="10" />
+                <HorizontalLayout height="25">
+                    <Button name="newMacroBtn" width="70" text= "新建"/>
+                    <Control width="15"/>
+                    <Button name="deleteMacroBtn" width="70" text= "删除"/>
+                </HorizontalLayout>
+            </VerticalLayout>
+            
+            <Control width="10" />
+            
+            <!--按键列表-->
+            <VerticalLayout>
+                <Label text="按键列表" height="25"/>
+                <List name="keyList">
+                </List>
+                <Control height="10" />
+                <HorizontalLayout height="25">
+                    <Button name="modifyEventBtn" width="70" text= "修改"/>
+                    <Control width="15"/>
+                    <Button name="deleteEventBtn" width="70" text= "删除"/>
+                </HorizontalLayout>
+            </VerticalLayout>
+            
+            <Control width="20" />
+            
+            <!--设置-->
+            <VerticalLayout width="150" inset="0,26,0,0">
+                <Button name="recordBtn" width="120" height="25" text= "开始录制宏"/>
+                <Control height="10" />
+                <HorizontalLayout height="25" >
+                    <Control width="2" />
+                    <Option name="insertDelayOption" padding="0,7,0,0" width="11" height="11" bkimage="file='check_nr.png'" hotimage="file='check_ov.png'" selectedimage="file='check_dn.png'"/>
+                    <Control width="10" />
+                    <Label text="自动插入延时" />
+                </HorizontalLayout>
+                <Control height="10" />
+                <HorizontalLayout height="25" >
+                    <Option name="releaseKeyRadio" padding="0,5,0,0" width="15" height="15" group="loop"/>
+                    <Control width="8" />
+                    <Label text="循环直到按键松开" />
+                </HorizontalLayout>
+                <Control height="10" />
+                <HorizontalLayout height="25" >
+                    <Option name="pressKeyRadio" padding="0,5,0,0" width="15" height="15" group="loop"/>
+                    <Control width="8" />
+                    <Label text="循环直到任意键按下" />
+                </HorizontalLayout>
+                <Control height="10" />
+                <HorizontalLayout height="25" >
+                    <Option name="loopCountRadio" padding="0,5,0,0" width="15" height="15" group="loop" selected="true"/>
+                    <Control width="8" />
+                    <Label text="指定循环次数" />
+                </HorizontalLayout>
+                <Control height="5" />
+                <HorizontalLayout height="18" >
+                    <Control width="23" />
+                    <Edit name="loopCountEdit" width="80" text="1" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="1" bordersize="1" />
+                </HorizontalLayout>
+                <Control height="20" />
+                <Label text="插入事件" height="25"/>
+                <Control height="5" />
+                <Combo name="insertEventCombo" height="20" width="125" dropboxsize="0,102" />
+            </VerticalLayout>
+        </HorizontalLayout>
+    </VerticalLayout>    
+</Window>
