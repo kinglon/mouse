@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include <shlwapi.h>
 #include "MainWindow.h"
-#include "MacroWindow.h"
 #include "LogUtil.h"
 #include "DumpUtil.h"
 #include "ImPath.h"
@@ -74,7 +73,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	//≥ı ºªØDuilibø‚
 	CPaintManagerUI::SetInstance(hInstance);
 
-	CMacroWindow mainWindow;
+	CMainWindow mainWindow;
 	mainWindow.Create(NULL, NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW, WS_EX_APPWINDOW);
 	mainWindow.CenterWindow();
 	mainWindow.ShowModal();

@@ -10,7 +10,7 @@
         
         <VerticalLayout inset="10,15,10,15">
             <!--输入文本内容-->
-            <Edit name="keyName" height="25" enabled="false" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="1" bordersize="1" />
+            <Edit name="keyName" height="25" enabled="false" bordercolor="#ffa8a8a8" textcolor="#ff000000" disabledtextcolor="#ff000000" font="1" bordersize="1" align="center"/>
             
             <Control />
             

@@ -4,11 +4,13 @@
     
     <Default name="Label" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; valign=&quot;center&quot; " />
     
-    <Default name="List" value="vscrollbar=&quot;true&quot; hscrollbar=&quot;false&quot; itemalign=&quot;left&quot; header=&quot;hidden&quot; bordersize=&quot;1&quot; bordercolor=&quot;#ffa3a3a1&quot; bkcolor=&quot;#ff4c4a4d&quot; itemtextcolor=&quot;#ffffffff&quot; itemhottextcolor=&quot;#ffffffff&quot; itemselectedtextcolor=&quot;#ffffffff&quot; itemfont=&quot;1&quot; itemhotbkcolor=&quot;#ffbbbbff&quot; itemselectedbkcolor=&quot;#ffbbbbff&quot;" />
+    <Default name="List" value="vscrollbar=&quot;true&quot; hscrollbar=&quot;false&quot; itemalign=&quot;left&quot; header=&quot;hidden&quot; bordersize=&quot;1&quot; bordercolor=&quot;#ffa3a3a1&quot; bkcolor=&quot;#ff4c4a4d&quot; itemtextcolor=&quot;#ffffffff&quot; itemhottextcolor=&quot;#ffffffff&quot; itemselectedtextcolor=&quot;#ffffffff&quot; itemfont=&quot;1&quot; itemhotbkcolor=&quot;#ffbbbbff&quot; itemselectedbkcolor=&quot;#ffbbbbff&quot; inset=&quot;2,2,2,2&quot;" />
     
     <Default name="Option" value="bkimage=&quot;file='radio_nr.png'&quot; hotimage=&quot;file='radio_ov.png'&quot; selectedimage=&quot;file='radio_dn.png'&quot;" />
     
     <Default name="Combo" value="font=&quot;1&quot; itemfont=&quot;1&quot; normalimage=&quot;file='combo3_nr.png' corner='2,2,15,2'&quot; hotimage=&quot;file='combo3_ov.png' corner='2,2,15,2'&quot; pushedimage=&quot;file='combo3_ov.png' corner='2,2,15,2'&quot; itembkimage=&quot;file='combo2_nr.png' corner='2,2,2,2'&quot; itemhotimage=&quot;file='combo2_ov.png' corner='2,2,2,2'&quot; textcolor=&quot;#fff0f0f0&quot; itemtextcolor=&quot;#fff0f0f0&quot; itemhottextcolor=&quot;#fff0f0f0&quot; itemselectedtextcolor=&quot;#fff0f0f0&quot; itemalign=&quot;center&quot;"/>
+    
+    <Default name="VScrollBar" width="26" value="button1normalimage=&quot;file='vscroll_button1_normal.png'&quot; button2normalimage=&quot;file='vscroll_button2_normal.png'&quot; thumbnormalimage=&quot;file='vscroll_thumb_normal.png' corner='6,6,6,6' &quot; railnormalimage=&quot;file='vscroll_rail_normal.png'&quot; bknormalimage=&quot;file='vscroll_bg_normal.png' &quot; " />
     
     <VerticalLayout name="root" bkimage="file='Frame_common.bmp' corner='16,33,5,5'">
         <!--标题栏-->
@@ -81,12 +83,12 @@
                 <Control height="5" />
                 <HorizontalLayout height="18" >
                     <Control width="23" />
-                    <Edit name="loopCountEdit" width="80" text="1" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="1" bordersize="1" />
+                    <Edit name="loopCountEdit" width="80" text="1" bordercolor="#ffa8a8a8" textcolor="#ff000000" font="3" bordersize="1" />
                 </HorizontalLayout>
                 <Control height="20" />
                 <Label text="插入事件" height="25"/>
                 <Control height="5" />
-                <Combo name="insertEventCombo" height="20" width="125" dropboxsize="0,102" />
+                <Combo name="insertEventCombo" height="20" width="125" dropboxsize="0,127" />
             </VerticalLayout>
         </HorizontalLayout>
     </VerticalLayout>    

@@ -1924,6 +1924,12 @@ void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
 			version += std::to_wstring(tlv.m_value[4]);
 			m_PaintManager.FindControl(L"driverVerson")->SetText(version.c_str());
 		}
+		else if (tlv.m_type == 0x4c) // ºê¶¨Òå
+		{
+			int keyNum = (int)tlv.m_value[0];
+			mouseConfig.SetKey(keyNum, KEY_INDEX_MACRO);
+			UpdateKeyPanel();
+		}
 	}
 
 	CSettingManager::GetInstance()->SaveMouseConfig();

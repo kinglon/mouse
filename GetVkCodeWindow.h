@@ -13,8 +13,13 @@ public:
 	UIEND_MSG_MAP
 
 public:
-	// 获取输入内容
 	int GetVkCode() { return m_vkCode; }
+
+	unsigned char GetVkCodeState() { return m_vkCodeState; }
+
+	// 获取Ctrl、Shift、Alt按键是否按下的状态
+	// 第0-7bit各代表left control, left shift, left alt, left win, right control, right shift, right alt, right win, 1 down, 0 up
+	static unsigned char GetSpecialKeyState();
 
 protected: //override base
 	virtual void InitWindow() override;
@@ -23,6 +28,8 @@ protected: //override base
 	virtual CDuiString GetSkinFile() override;
 	virtual LPCTSTR GetWindowClassName(void) const override;
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	virtual LRESULT ResponseDefaultKeyEvent(WPARAM wParam) override;
+	virtual LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool& bHandled) override;
 
 private:
 	void OnKey(bool down, WPARAM wParam, LPARAM lParam);
@@ -32,5 +39,7 @@ private:
 
 private:
 	int m_vkCode = 0;
+
+	unsigned char m_vkCodeState = 0;
 };
 

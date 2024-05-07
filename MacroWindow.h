@@ -35,7 +35,9 @@ protected: //override base
 	virtual CDuiString GetSkinFolder() override;
 	virtual CDuiString GetSkinFile() override;
 	virtual LPCTSTR GetWindowClassName(void) const override;
-	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;	
+	virtual LRESULT ResponseDefaultKeyEvent(WPARAM wParam) override;
+	virtual LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool& bHandled) override;
 
 private:
 	void OnClickEvent(TNotifyUI& msg);

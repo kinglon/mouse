@@ -321,14 +321,15 @@ std::wstring CMacroEventMapping::GetKeyName(int vkCode)
 		}
 		for (char ch = 'A'; ch <= 'Z'; ch++)
 		{
-			vkCode2KeyNames[(int)ch] = std::to_wstring(L'A' + ch - 'A');
+			wchar_t keyName = (wchar_t)(L'A' + ch - 'A');
+			vkCode2KeyNames[(int)ch] = std::wstring().append(1, keyName);
 		}
 		vkCode2KeyNames[VK_LWIN] = L"Left Windows";
 		vkCode2KeyNames[VK_RWIN] = L"Right Windows";
 		vkCode2KeyNames[VK_APPS] = L"Applications";
 		for (int i = VK_NUMPAD0; i <= VK_NUMPAD9; i++)
 		{
-			vkCode2KeyNames[i] = std::to_wstring(L'0' + i - VK_NUMPAD0);
+			vkCode2KeyNames[i] = std::to_wstring(i - VK_NUMPAD0);
 		}
 		vkCode2KeyNames[VK_MULTIPLY] = L"MULTIPLY";
 		vkCode2KeyNames[VK_ADD] = L"ADD";

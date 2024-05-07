@@ -35,11 +35,15 @@ void CMacroWindow::InitWindow()
 {
 	__super::InitWindow();	
 
+	m_PaintManager.AddMessageFilter(this);
+
 	InitControls();
 }
 
 void CMacroWindow::OnFinalMessage(HWND hWnd)
 {
+	m_PaintManager.RemoveMessageFilter(this);
+
 	__super::OnFinalMessage(hWnd);
 }
 
@@ -60,13 +64,13 @@ LPCTSTR CMacroWindow::GetWindowClassName(void) const
 
 LRESULT CMacroWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_KEYDOWN)
+	if (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN)
 	{
 		OnKey(true, wParam, lParam);
 		return 0L;
 	}
 
-	if (uMsg == WM_KEYUP)
+	if (uMsg == WM_KEYUP || uMsg == WM_SYSKEYUP)
 	{
 		OnKey(false, wParam, lParam);
 		return 0L;
@@ -88,6 +92,36 @@ LRESULT CMacroWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return __super::HandleMessage(uMsg, wParam, lParam);
+}
+
+LRESULT CMacroWindow::ResponseDefaultKeyEvent(WPARAM wParam)
+{
+	if (wParam == VK_ESCAPE)
+	{
+		return FALSE;
+	}
+
+	return __super::ResponseDefaultKeyEvent(wParam);
+}
+
+LRESULT CMacroWindow::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool& bHandled)
+{
+	bHandled = false;
+	if (uMsg == WM_KEYDOWN && wParam == VK_TAB)
+	{
+		OnKey(true, wParam, lParam);
+		bHandled = true;
+		return 0L;
+	}
+
+	if (uMsg == WM_KEYUP && wParam == VK_TAB)
+	{
+		OnKey(false, wParam, lParam);
+		bHandled = true;
+		return 0L;
+	}
+
+	return __super::MessageHandler(uMsg, wParam, lParam, bHandled);
 }
 
 void CMacroWindow::OnClickEvent(TNotifyUI& msg)
@@ -167,6 +201,26 @@ void CMacroWindow::OnKey(bool down, WPARAM wParam, LPARAM lParam)
 		return;
 	}	
 
+	// 判断是否支持该按键
+	int vkCode = (int)wParam;
+	if (CMacroEventMapping::GetKeyName(vkCode).empty())
+	{
+		return;
+	}
+
+	// 判断是否数量超过
+	CMacroCmd* currentMacro = GetSelectedMacro();
+	if (currentMacro == nullptr)
+	{
+		return;
+	}
+
+	if (currentMacro->GetEventCount() + 1 > MAX_EVENT_LIST_SIZE)
+	{
+		CMyMessageBox::Show(GetHWND(), L"按键数已超过最大限制");
+		return;
+	}	
+
 	// 添加延时事件
 	int delay = 0;
 	if (m_recordSetting.m_insertDelay && m_recordSetting.m_lastKeyTime > 0)
@@ -186,29 +240,8 @@ void CMacroWindow::OnKey(bool down, WPARAM wParam, LPARAM lParam)
 	CMacroEvent keyEvent;
 	keyEvent.m_type = 1;
 	keyEvent.m_down = down;	
-	keyEvent.m_vkCode = (int)wParam;
-
-	// 获取Ctrl、Shift、Alt按键是否按下的状态
-	// 第0-7bit各代表left control, left shift, left alt, left win, right control, right shift, right alt, right win, 1 down, 0 up
-	unsigned char keyState = 0;
-	SHORT state = GetKeyState(VK_LCONTROL);  // 最高位1表示donw, 0表示up
-	keyState |= ((state >> 15) & 0X01);
-	state = GetKeyState(VK_LSHIFT);
-	keyState |= ((state >> 14) & 0X02);
-	state = GetKeyState(VK_LMENU);
-	keyState |= ((state >> 13) & 0X04);
-	state = GetKeyState(VK_LWIN);
-	keyState |= ((state >> 12) & 0X08);
-	state = GetKeyState(VK_RCONTROL);
-	keyState |= ((state >> 11) & 0X10);
-	state = GetKeyState(VK_RSHIFT);
-	keyState |= ((state >> 10) & 0X20);
-	state = GetKeyState(VK_RMENU);
-	keyState |= ((state >> 9) & 0X40);
-	state = GetKeyState(VK_RWIN);
-	keyState |= ((state >> 8) & 0X80);
-	keyEvent.m_keyFlag = keyState;
-
+	keyEvent.m_vkCode = vkCode;
+	keyEvent.m_keyFlag = CGetVkCodeWindow::GetSpecialKeyState();
 	InsertMacroEvent(keyEvent);
 }
 
@@ -334,6 +367,7 @@ void CMacroWindow::OnModifyMacroEvent()
 		}
 
 		event.m_vkCode = getVkCodeWindow.GetVkCode();
+		event.m_keyFlag = getVkCodeWindow.GetVkCodeState();
 		CControlUI* contentCtrl = m_PaintManager.FindSubControlByName(keyList->GetItemAt(selIndex), L"content");
 		contentCtrl->SetText(CMacroEventMapping::GetEventName(event).c_str());
 	}	
@@ -392,7 +426,7 @@ void CMacroWindow::OnInsertEvent()
 	}
 
 	// 不需要显示选择的内容
-	insertEventCombo->SetText(L"");
+	insertEventCombo->SelectItem(-1);
 
 	// 如果非延时事件，校验事件数量是否超过
 	CMacroCmd* macroCmd = GetSelectedMacro();
@@ -407,11 +441,27 @@ void CMacroWindow::OnInsertEvent()
 		return;
 	}
 
-	// 获取插入位置
+	// 在选择的位置后面插入
 	int insertPos = GetKeyListControl()->GetCurSel();
-	
+	if (insertPos == -1)
+	{
+		if (GetKeyListControl()->GetCount() == 0)
+		{
+			insertPos = 0;
+		}
+		else
+		{
+			CMyMessageBox::Show(GetHWND(), L"选择插入位置");
+			return;
+		}
+	}
+	else
+	{
+		insertPos += 1;
+	}
+
 	// 插入鼠标事件
-	if (curSel >= INSERT_EVENT_INDEX_LEFT_MOUSE && curSel <= INSERT_EVENT_INDEX_RIGHT_MOUSE)
+	if (curSel >= INSERT_EVENT_INDEX_LEFT_MOUSE && curSel <= INSERT_EVENT_INDEX_MIDDLE_MOUSE)
 	{
 		// 新增down事件
 		CMacroEvent downEvent;
@@ -430,24 +480,22 @@ void CMacroWindow::OnInsertEvent()
 			downEvent.m_mouseKey = 2;
 		}
 		InsertMacroEvent(downEvent, insertPos);
-		if (insertPos != -1)
-		{
-			insertPos += 1;
-		}
+		insertPos += 1;
 
 		// 延迟50毫秒，新增延时事件
-		CMacroEvent delayEvent;
-		delayEvent.m_type = 3;
-		delayEvent.m_delayMillSec = 50;
-		InsertMacroEvent(delayEvent, insertPos);
-		if (insertPos != -1)
+		bool insertDelay = ((COptionUI*)m_PaintManager.FindControl(L"insertDelayOption"))->IsSelected();
+		if (insertDelay)
 		{
+			CMacroEvent delayEvent;
+			delayEvent.m_type = 3;
+			delayEvent.m_delayMillSec = 50;
+			InsertMacroEvent(delayEvent, insertPos);
 			insertPos += 1;
 		}
 
 		// 新增up事件
 		downEvent.m_down = false;
-		InsertMacroEvent(delayEvent, insertPos);
+		InsertMacroEvent(downEvent, insertPos);
 	}
 	else if (curSel == INSERT_EVENT_INDEX_KEYPAD)
 	{
@@ -465,21 +513,20 @@ void CMacroWindow::OnInsertEvent()
 		downEvent.m_type = 1;
 		downEvent.m_down = true;
 		downEvent.m_vkCode = getVkCodeWindow.GetVkCode();
+		downEvent.m_keyFlag = getVkCodeWindow.GetVkCodeState();
 		InsertMacroEvent(downEvent, insertPos);
-		if (insertPos != -1)
-		{
-			insertPos += 1;
-		}
+		insertPos += 1;
 
 		// 延迟50毫秒，新增延时事件
-		CMacroEvent delayEvent;
-		delayEvent.m_type = 3;
-		delayEvent.m_delayMillSec = 50;
-		InsertMacroEvent(delayEvent, insertPos);
-		if (insertPos != -1)
+		bool insertDelay = ((COptionUI*)m_PaintManager.FindControl(L"insertDelayOption"))->IsSelected();
+		if (insertDelay)
 		{
+			CMacroEvent delayEvent;
+			delayEvent.m_type = 3;
+			delayEvent.m_delayMillSec = 50;
+			InsertMacroEvent(delayEvent, insertPos);
 			insertPos += 1;
-		}		
+		}
 
 		// 延迟50毫秒，新增up事件
 		downEvent.m_down = false;
@@ -569,6 +616,7 @@ void CMacroWindow::UpdateMacroList(std::wstring selMacroName)
 		CListLabelElementUI* labelElementUI = new CListLabelElementUI();
 		labelElementUI->SetText(macroCmdConfig[i].m_name.c_str());
 		labelElementUI->SetAttribute(L"padding", L"2,2,2,2");
+		labelElementUI->SetFixedHeight(25);
 		macroList->Add(labelElementUI);
 		if (selMacroName == macroCmdConfig[i].m_name)
 		{
@@ -672,30 +720,19 @@ void CMacroWindow::InsertMacroEvent(const CMacroEvent& event, int pos)
 
 void CMacroWindow::InsertEventListItem(const CMacroEvent& event, int pos)
 {
+	CDialogBuilder builder;
+	CControlUI* eventItemUI = builder.Create(L"macro_event_item.xml");
+	CControlUI* iconControl = m_PaintManager.FindSubControlByName(eventItemUI, L"icon");
+	CLabelUI* contentCtrl = (CLabelUI*)m_PaintManager.FindSubControlByName(eventItemUI, L"content");
+
 	// 延时事件
 	if (event.m_type == 3)
 	{
-		CDialogBuilder builder;
-		CControlUI* eventItemUI = builder.Create(L"macro_event_item.xml");
-
-		// 设置图标
-		CControlUI* iconControl = m_PaintManager.FindSubControlByName(eventItemUI, L"icon");
 		iconControl->SetBkImage(L"file='macro_time.png'");
-
-		// 设置文本
-		CLabelUI* contentCtrl = (CLabelUI*)m_PaintManager.FindSubControlByName(eventItemUI, L"content");
-		contentCtrl->SetText((std::to_wstring(event.m_delayMillSec) + L"ms").c_str());		
-
-		GetKeyListControl()->AddAt(eventItemUI, pos);
+		contentCtrl->SetText((std::to_wstring(event.m_delayMillSec) + L"ms").c_str());
 	}
 	else
-	{
-		// 插入按键信息
-		CDialogBuilder builder;
-		CControlUI* eventItemUI = builder.Create(L"macro_event_item.xml");
-
-		// 设置图标
-		CControlUI* iconControl = m_PaintManager.FindSubControlByName(eventItemUI, L"icon");
+	{		
 		if (event.m_down)
 		{
 			iconControl->SetBkImage(L"file='macro_down.png'");
@@ -703,12 +740,16 @@ void CMacroWindow::InsertEventListItem(const CMacroEvent& event, int pos)
 		else
 		{
 			iconControl->SetBkImage(L"file='macro_up.png'");
-		}
-
-		// 设置文本
-		CLabelUI* contentCtrl = (CLabelUI*)m_PaintManager.FindSubControlByName(eventItemUI, L"content");
+		}		
 		contentCtrl->SetText(CMacroEventMapping::GetEventName(event).c_str());		
+	}
 
+	if (pos < 0)
+	{
+		GetKeyListControl()->Add(eventItemUI);
+	}
+	else
+	{
 		GetKeyListControl()->AddAt(eventItemUI, pos);
 	}
 }
