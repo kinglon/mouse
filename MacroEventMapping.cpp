@@ -391,3 +391,23 @@ ST_KEY_CODE* CMacroEventMapping::GetKeyCodeByVkCode(int vkCode)
 
 	return &st_code_data[vkCode];
 }
+
+bool CMacroEventMapping::IsSpecialKey(int vkCode)
+{
+	if (vkCode == VK_SHIFT
+		|| vkCode == VK_CONTROL
+		|| vkCode == VK_MENU
+		|| vkCode == VK_LWIN
+		|| vkCode == VK_RWIN
+		|| vkCode == VK_LSHIFT
+		|| vkCode == VK_RSHIFT
+		|| vkCode == VK_LCONTROL
+		|| vkCode == VK_RCONTROL
+		|| vkCode == VK_LMENU
+		|| vkCode == VK_RMENU)
+	{
+		return true;
+	}
+
+	return false;
+}

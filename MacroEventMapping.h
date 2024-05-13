@@ -20,5 +20,8 @@ public:
 
 	// 根据Windows系统的vk码获取自己设备的按键码
 	static ST_KEY_CODE* GetKeyCodeByVkCode(int vkCode);
+
+	// 判断是否为特殊按键
+	static bool IsSpecialKey(int vkCode);
 };
 

@@ -137,6 +137,9 @@ public:
 	int m_delayMillSec = 0;
 };
 
+// 最大事件大小
+#define MAX_EVENT_LIST_SIZE  40
+
 // 宏命令
 class CMacroCmd
 {

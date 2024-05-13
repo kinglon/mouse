@@ -7,9 +7,6 @@
 #include "MyMessageBox.h"
 #include "GetVkCodeWindow.h"
 
-// 最大事件大小
-#define MAX_EVENT_LIST_SIZE  48
-
 // selectitem事件处理函数内不能ShowModal()，于是异步发送一个新消息
 #define WM_SELECT_ITEM			WM_USER+101
 

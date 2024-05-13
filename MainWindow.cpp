@@ -1393,7 +1393,7 @@ void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 				newEvent.m_delayMillSec = 65535;
 			}
 			newEvents.push_back(newEvent);
-			if (newEvents.size() == 48)
+			if (newEvents.size() == MAX_EVENT_LIST_SIZE)
 			{
 				break;
 			}
@@ -1422,34 +1422,13 @@ void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 				return;
 			}
 
+			// 键盘按键，第一字节为reportId，第二字节和第三个字节是键值，第6字节操作码
 			tlvData[offset] = keyCode->uc_reportID;
-			if (keyCode->uc_reportID == 1)
+			if (CMacroEventMapping::IsSpecialKey(event.m_vkCode))
 			{
-				if (event.m_vkCode == VK_BROWSER_HOME)  // 特殊处理
-				{
-					if (event.m_down)
-					{
-						tlvData[offset + 1] = keyCode->aucCode[0];
-						tlvData[offset + 2] = keyCode->aucCode[1];
-					}
-					else
-					{
-						tlvData[offset + 1] = 0;
-						tlvData[offset + 2] = 0;
-					}
-				}
-				else
-				{
-					tlvData[offset + 1] = event.m_keyFlag;
-					if (event.m_down)
-					{
-						tlvData[offset + 2] = keyCode->aucCode[1];
-					}
-					else
-					{
-						tlvData[offset + 2] = 0;
-					}
-				}
+				tlvData[offset + 1] = event.m_keyFlag;
+				tlvData[offset + 2] = 0;
+				tlvData[offset + 5] = 0;
 			}
 			else
 			{
@@ -1463,7 +1442,8 @@ void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 					tlvData[offset + 1] = 0;
 					tlvData[offset + 2] = 0;
 				}
-			}			
+				tlvData[offset + 5] = keyCode->aucCode[1];
+			}
 		}
 		else if (event.m_type == 2)
 		{
@@ -1498,6 +1478,7 @@ void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 				tlvData[offset + 1] = 0x00;
 				tlvData[offset + 2] = 0x00;
 			}
+			tlvData[offset + 5] = 0x00;
 		}
 		else
 		{
@@ -1507,9 +1488,9 @@ void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 
 		// 第四和第五字节为延时，小端格式
 		tlvData[offset + 3] = (unsigned char)(event.m_delayMillSec & 0xFF);
-		tlvData[offset + 4] = (unsigned char)((event.m_delayMillSec >> 8) & 0xFF);
+		tlvData[offset + 4] = (unsigned char)((event.m_delayMillSec >> 8) & 0xFF);		
 
-		offset += 5;
+		offset += 6;
 	}
 
 	// 构造TLV
