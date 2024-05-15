@@ -301,6 +301,9 @@ bool CMouseCommManager::WriteData()
 			}
 		}
 
+		// 底层驱动实现不严谨，没有发送完成就告知发送完成，如果马上发下一条，这条数据就会被吃掉，所以固定延时后再发送
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 		if (WaitForSingleObject(overlapped.hEvent, 1000) != WAIT_OBJECT_0)
 		{
 			LOG_ERROR(L"failed to send data, error is timeout");

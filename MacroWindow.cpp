@@ -405,6 +405,14 @@ void CMacroWindow::OnRecordMacro()
 	}
 	else
 	{
+		// 清空按键列表
+		GetKeyListControl()->RemoveAll();
+		CMacroCmd* currentMacro = GetSelectedMacro();
+		if (currentMacro)
+		{
+			currentMacro->m_events.clear();
+		}
+
 		// 无录制，切换为正在录制
 		m_PaintManager.FindControl(L"recordBtn")->SetText(L"停止录制宏");
 		m_recordSetting.m_record = true;
