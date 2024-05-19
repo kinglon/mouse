@@ -294,6 +294,15 @@ void CSettingManager::LoadMouseConfig(const std::wstring& configName)
 		}
 	}
 
+	if (root.isMember("composeKey"))
+	{
+		for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_composeKeys) && i < root["composeKey"].size(); i++)
+		{
+			m_mouseConfig.m_composeKeys[i].m_vkCode = root["composeKey"][i]["vkcode"].asInt();
+			m_mouseConfig.m_composeKeys[i].m_keyState = (unsigned char)root["composeKey"][i]["keyState"].asInt();
+		}
+	}
+
 	if (root.isMember("sleepTime"))
 	{
 		m_mouseConfig.m_sleepTime = root["sleepTime"].asInt();
@@ -366,6 +375,14 @@ void CSettingManager::SaveMouseConfig(const std::wstring& configName)
 	for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_macroCmdNames); i++)
 	{
 		root["macro"].append(CImCharset::UnicodeToUTF8(m_mouseConfig.m_macroCmdNames[i].c_str()));
+	}
+
+	for (unsigned int i = 0; i < ARRAYSIZE(m_mouseConfig.m_composeKeys); i++)
+	{
+		Json::Value composeKeyValue;
+		composeKeyValue["vkcode"] = m_mouseConfig.m_composeKeys[i].m_vkCode;
+		composeKeyValue["keyState"] = m_mouseConfig.m_composeKeys[i].m_keyState;
+		root["composeKey"].append(composeKeyValue);
 	}
 
 	root["currentDpi"] = m_mouseConfig.m_currentDpi;

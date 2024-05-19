@@ -43,6 +43,17 @@ public:
 	unsigned int m_dpiColor = 0xff0000;
 };
 
+// 组合键
+class CComposeKey
+{
+public:
+	// vkcode
+	int m_vkCode = 0;
+
+	// 特殊按键状态
+	unsigned char m_keyState = 0;
+};
+
 class CMouseConfig
 {
 public:
@@ -81,6 +92,9 @@ public:
 
 	// 设置为KEY_INDEX_MACRO时使用，表示按键设置的宏命令名称
 	std::wstring m_macroCmdNames[6];
+
+	// 组合按键
+	CComposeKey m_composeKeys[6];
 
 	// 休眠时间，默认是1分钟
 	int m_sleepTime = 1;

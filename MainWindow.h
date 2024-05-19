@@ -46,6 +46,9 @@ private:
 	// 宏命令菜单触发
 	void OnMacroMenuCommand();
 
+	// 组合按键命令菜单触发
+	void OnComposeKeyCommand();
+
 	// 关闭右侧所有的设置面板
 	void CloseRightSettingPannels();
 
@@ -109,9 +112,18 @@ private:
 	void ClickDpiValueBtn(CButtonUI* button);
 	void SwitchCurrentDpi(CButtonUI* button);
 
+	// 获取组合键的名字
+	std::wstring GetComposeKeyName(const CComposeKey& composeKey);
+	
+	// 从按键名字获取组合按键
+	CComposeKey GetComposeKey(const std::wstring& keyName);
+
 private:
 	// 给鼠标配置按键
 	void SetKeyToMouse(int keyNum, int keyIndex);
+
+	// 给鼠标配置组合按键
+	void SetComposeKeyToMouse(int keyNum, CComposeKey composeKey);
 
 	// 给鼠标配置宏
 	void SetMacroToMouse(int keyNum, std::wstring macroName);

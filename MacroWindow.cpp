@@ -356,6 +356,9 @@ void CMacroWindow::OnModifyMacroEvent()
 	{
 		// 修改按键事件，先获取一个按键
 		CGetVkCodeWindow getVkCodeWindow;
+		getVkCodeWindow.SetTitle(L"修改按键");
+		getVkCodeWindow.SetVkCode(event.m_vkCode);
+		getVkCodeWindow.SetVkCodeState(event.m_keyFlag);
 		getVkCodeWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
 		getVkCodeWindow.CenterWindow();
 		if (getVkCodeWindow.ShowModal() == 0)
@@ -506,6 +509,7 @@ void CMacroWindow::OnInsertEvent()
 	{
 		// 插入按键事件，先获取一个按键
 		CGetVkCodeWindow getVkCodeWindow;
+		getVkCodeWindow.SetTitle(L"插入按键");
 		getVkCodeWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
 		getVkCodeWindow.CenterWindow();
 		if (getVkCodeWindow.ShowModal() == 0)

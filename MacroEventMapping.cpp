@@ -260,6 +260,8 @@ ST_KEY_CODE st_code_data[255] =
 	{ 0x00, 0x00, 0x00 },//							FF
 };
 
+std::map<int, std::wstring> CMacroEventMapping::m_vkCode2KeyNames;
+
 std::wstring CMacroEventMapping::GetEventName(const CMacroEvent& event)
 {
 	if (event.m_type == 1)
@@ -287,98 +289,115 @@ std::wstring CMacroEventMapping::GetEventName(const CMacroEvent& event)
 
 std::wstring CMacroEventMapping::GetKeyName(int vkCode)
 {
-	static std::map<int, std::wstring> vkCode2KeyNames;
-	if (vkCode2KeyNames.size() == 0)
-	{
-		vkCode2KeyNames[VK_BACK] = L"BACKSPACE";
-		vkCode2KeyNames[VK_TAB] = L"TAB";
-		vkCode2KeyNames[VK_CLEAR] = L"CLEAR";
-		vkCode2KeyNames[VK_RETURN] = L"ENTER";
-		vkCode2KeyNames[VK_SHIFT] = L"SHIFT";
-		vkCode2KeyNames[VK_CONTROL] = L"CTRL";
-		vkCode2KeyNames[VK_MENU] = L"ALT";
-		vkCode2KeyNames[VK_PAUSE] = L"PAUSE";
-		vkCode2KeyNames[VK_CAPITAL] = L"CAPS LOCK";
-		vkCode2KeyNames[VK_ESCAPE] = L"ESC";
-		vkCode2KeyNames[VK_SPACE] = L"SPACEBAR";
-		vkCode2KeyNames[VK_PRIOR] = L"PAGE UP";
-		vkCode2KeyNames[VK_NEXT] = L"PAGE DOWN";
-		vkCode2KeyNames[VK_END] = L"END";
-		vkCode2KeyNames[VK_HOME] = L"HOME";
-		vkCode2KeyNames[VK_LEFT] = L"LEFT ARROW";
-		vkCode2KeyNames[VK_UP] = L"UP ARROW";
-		vkCode2KeyNames[VK_RIGHT] = L"RIGHT ARROW";
-		vkCode2KeyNames[VK_DOWN] = L"DOWN ARROW";
-		vkCode2KeyNames[VK_SELECT] = L"SELECT";
-		vkCode2KeyNames[VK_EXECUTE] = L"EXECUTE";
-		vkCode2KeyNames[VK_SNAPSHOT] = L"PRINT SCREEN";
-		vkCode2KeyNames[VK_INSERT] = L"INS";
-		vkCode2KeyNames[VK_DELETE] = L"DEL";
-		vkCode2KeyNames[VK_HELP] = L"HELP";
-		for (char ch = '0'; ch <= '9'; ch++)
-		{
-			vkCode2KeyNames[(int)ch] = std::to_wstring(ch-'0');
-		}
-		for (char ch = 'A'; ch <= 'Z'; ch++)
-		{
-			wchar_t keyName = (wchar_t)(L'A' + ch - 'A');
-			vkCode2KeyNames[(int)ch] = std::wstring().append(1, keyName);
-		}
-		vkCode2KeyNames[VK_LWIN] = L"Left Windows";
-		vkCode2KeyNames[VK_RWIN] = L"Right Windows";
-		vkCode2KeyNames[VK_APPS] = L"Applications";
-		for (int i = VK_NUMPAD0; i <= VK_NUMPAD9; i++)
-		{
-			vkCode2KeyNames[i] = std::to_wstring(i - VK_NUMPAD0);
-		}
-		vkCode2KeyNames[VK_MULTIPLY] = L"MULTIPLY";
-		vkCode2KeyNames[VK_ADD] = L"ADD";
-		vkCode2KeyNames[VK_SEPARATOR] = L"SEPARATOR";
-		vkCode2KeyNames[VK_SUBTRACT] = L"SUBTRACT";
-		vkCode2KeyNames[VK_DECIMAL] = L"DECIMAL";
-		vkCode2KeyNames[VK_DIVIDE] = L"DIVIDE";
-		for (int i = VK_F1; i <= VK_F24; i++)
-		{
-			vkCode2KeyNames[i] = std::wstring(L"F") + std::to_wstring(i - VK_F1 + 1);
-		}
-		vkCode2KeyNames[VK_NUMLOCK] = L"NUM LOCK";
-		vkCode2KeyNames[VK_SCROLL] = L"SCROLL LOCK";
-		vkCode2KeyNames[VK_OEM_NEC_EQUAL] = L"NEC EQUAL";
-		vkCode2KeyNames[VK_LSHIFT] = L"LEFT SHIFT";
-		vkCode2KeyNames[VK_RSHIFT] = L"RIGHT SHIFT";
-		vkCode2KeyNames[VK_LCONTROL] = L"LEFT CTRL";
-		vkCode2KeyNames[VK_RCONTROL] = L"RIGHT CTRL";
-		vkCode2KeyNames[VK_LMENU] = L"LEFT ALT";
-		vkCode2KeyNames[VK_RMENU] = L"RIGHT ALT";
-		vkCode2KeyNames[VK_BROWSER_HOME] = L"BROWSER HOME";
-		vkCode2KeyNames[VK_VOLUME_MUTE] = L"VOLUME MUTE";
-		vkCode2KeyNames[VK_VOLUME_DOWN] = L"VOLUME DOWN";
-		vkCode2KeyNames[VK_VOLUME_UP] = L"VOLUME UP";
-		vkCode2KeyNames[VK_MEDIA_NEXT_TRACK] = L"NEXT TRACK";
-		vkCode2KeyNames[VK_MEDIA_PREV_TRACK] = L"PREV TRACK";
-		vkCode2KeyNames[VK_MEDIA_STOP] = L"STOP";
-		vkCode2KeyNames[VK_MEDIA_PLAY_PAUSE] = L"PLAY PAUSE";
-		vkCode2KeyNames[VK_OEM_1] = L"OEM 1";
-		vkCode2KeyNames[VK_OEM_PLUS] = L"OEM PLUS";
-		vkCode2KeyNames[VK_OEM_COMMA] = L"OEM COMMA";
-		vkCode2KeyNames[VK_OEM_MINUS] = L"OEM MINUS";
-		vkCode2KeyNames[VK_OEM_PERIOD] = L"OEM PERIOD";
-		vkCode2KeyNames[VK_OEM_2] = L"OEM 2";
-		vkCode2KeyNames[VK_OEM_3] = L"OEM 3";
-		vkCode2KeyNames[VK_OEM_4] = L"OEM 4";
-		vkCode2KeyNames[VK_OEM_5] = L"OEM 5";
-		vkCode2KeyNames[VK_OEM_6] = L"OEM 6";
-		vkCode2KeyNames[VK_OEM_7] = L"OEM 7";
-	}
-	
-	auto& it = vkCode2KeyNames.find(vkCode);
-	if (it == vkCode2KeyNames.end())
+	InitVkCode2KeyNames();
+	auto& it = m_vkCode2KeyNames.find(vkCode);
+	if (it == m_vkCode2KeyNames.end())
 	{
 		return L"";
 	}
 	else
 	{
 		return it->second;
+	}
+}
+
+int CMacroEventMapping::GetVkCodeByKeyName(std::wstring keyName)
+{
+	InitVkCode2KeyNames();
+	for (auto& item : m_vkCode2KeyNames)
+	{
+		if (item.second == keyName)
+		{
+			return item.first;
+		}
+	}
+
+	return 0;
+}
+
+void CMacroEventMapping::InitVkCode2KeyNames()
+{
+	if (m_vkCode2KeyNames.size() == 0)
+	{
+		m_vkCode2KeyNames[VK_BACK] = L"BACKSPACE";
+		m_vkCode2KeyNames[VK_TAB] = L"TAB";
+		m_vkCode2KeyNames[VK_CLEAR] = L"CLEAR";
+		m_vkCode2KeyNames[VK_RETURN] = L"ENTER";
+		m_vkCode2KeyNames[VK_SHIFT] = L"SHIFT";
+		m_vkCode2KeyNames[VK_CONTROL] = L"CTRL";
+		m_vkCode2KeyNames[VK_MENU] = L"ALT";
+		m_vkCode2KeyNames[VK_PAUSE] = L"PAUSE";
+		m_vkCode2KeyNames[VK_CAPITAL] = L"CAPS LOCK";
+		m_vkCode2KeyNames[VK_ESCAPE] = L"ESC";
+		m_vkCode2KeyNames[VK_SPACE] = L"SPACEBAR";
+		m_vkCode2KeyNames[VK_PRIOR] = L"PAGE UP";
+		m_vkCode2KeyNames[VK_NEXT] = L"PAGE DOWN";
+		m_vkCode2KeyNames[VK_END] = L"END";
+		m_vkCode2KeyNames[VK_HOME] = L"HOME";
+		m_vkCode2KeyNames[VK_LEFT] = L"LEFT ARROW";
+		m_vkCode2KeyNames[VK_UP] = L"UP ARROW";
+		m_vkCode2KeyNames[VK_RIGHT] = L"RIGHT ARROW";
+		m_vkCode2KeyNames[VK_DOWN] = L"DOWN ARROW";
+		m_vkCode2KeyNames[VK_SELECT] = L"SELECT";
+		m_vkCode2KeyNames[VK_EXECUTE] = L"EXECUTE";
+		m_vkCode2KeyNames[VK_SNAPSHOT] = L"PRINT SCREEN";
+		m_vkCode2KeyNames[VK_INSERT] = L"INS";
+		m_vkCode2KeyNames[VK_DELETE] = L"DEL";
+		m_vkCode2KeyNames[VK_HELP] = L"HELP";
+		for (char ch = '0'; ch <= '9'; ch++)
+		{
+			m_vkCode2KeyNames[(int)ch] = std::to_wstring(ch - '0');
+		}
+		for (char ch = 'A'; ch <= 'Z'; ch++)
+		{
+			wchar_t keyName = (wchar_t)(L'A' + ch - 'A');
+			m_vkCode2KeyNames[(int)ch] = std::wstring().append(1, keyName);
+		}
+		m_vkCode2KeyNames[VK_LWIN] = L"Left Windows";
+		m_vkCode2KeyNames[VK_RWIN] = L"Right Windows";
+		m_vkCode2KeyNames[VK_APPS] = L"Applications";
+		for (int i = VK_NUMPAD0; i <= VK_NUMPAD9; i++)
+		{
+			m_vkCode2KeyNames[i] = std::to_wstring(i - VK_NUMPAD0);
+		}
+		m_vkCode2KeyNames[VK_MULTIPLY] = L"MULTIPLY";
+		m_vkCode2KeyNames[VK_ADD] = L"ADD";
+		m_vkCode2KeyNames[VK_SEPARATOR] = L"SEPARATOR";
+		m_vkCode2KeyNames[VK_SUBTRACT] = L"SUBTRACT";
+		m_vkCode2KeyNames[VK_DECIMAL] = L"DECIMAL";
+		m_vkCode2KeyNames[VK_DIVIDE] = L"DIVIDE";
+		for (int i = VK_F1; i <= VK_F24; i++)
+		{
+			m_vkCode2KeyNames[i] = std::wstring(L"F") + std::to_wstring(i - VK_F1 + 1);
+		}
+		m_vkCode2KeyNames[VK_NUMLOCK] = L"NUM LOCK";
+		m_vkCode2KeyNames[VK_SCROLL] = L"SCROLL LOCK";
+		m_vkCode2KeyNames[VK_OEM_NEC_EQUAL] = L"NEC EQUAL";
+		m_vkCode2KeyNames[VK_LSHIFT] = L"LEFT SHIFT";
+		m_vkCode2KeyNames[VK_RSHIFT] = L"RIGHT SHIFT";
+		m_vkCode2KeyNames[VK_LCONTROL] = L"LEFT CTRL";
+		m_vkCode2KeyNames[VK_RCONTROL] = L"RIGHT CTRL";
+		m_vkCode2KeyNames[VK_LMENU] = L"LEFT ALT";
+		m_vkCode2KeyNames[VK_RMENU] = L"RIGHT ALT";
+		m_vkCode2KeyNames[VK_BROWSER_HOME] = L"BROWSER HOME";
+		m_vkCode2KeyNames[VK_VOLUME_MUTE] = L"VOLUME MUTE";
+		m_vkCode2KeyNames[VK_VOLUME_DOWN] = L"VOLUME DOWN";
+		m_vkCode2KeyNames[VK_VOLUME_UP] = L"VOLUME UP";
+		m_vkCode2KeyNames[VK_MEDIA_NEXT_TRACK] = L"NEXT TRACK";
+		m_vkCode2KeyNames[VK_MEDIA_PREV_TRACK] = L"PREV TRACK";
+		m_vkCode2KeyNames[VK_MEDIA_STOP] = L"STOP";
+		m_vkCode2KeyNames[VK_MEDIA_PLAY_PAUSE] = L"PLAY PAUSE";
+		m_vkCode2KeyNames[VK_OEM_1] = L"OEM 1";
+		m_vkCode2KeyNames[VK_OEM_PLUS] = L"OEM PLUS";
+		m_vkCode2KeyNames[VK_OEM_COMMA] = L"OEM COMMA";
+		m_vkCode2KeyNames[VK_OEM_MINUS] = L"OEM MINUS";
+		m_vkCode2KeyNames[VK_OEM_PERIOD] = L"OEM PERIOD";
+		m_vkCode2KeyNames[VK_OEM_2] = L"OEM 2";
+		m_vkCode2KeyNames[VK_OEM_3] = L"OEM 3";
+		m_vkCode2KeyNames[VK_OEM_4] = L"OEM 4";
+		m_vkCode2KeyNames[VK_OEM_5] = L"OEM 5";
+		m_vkCode2KeyNames[VK_OEM_6] = L"OEM 6";
+		m_vkCode2KeyNames[VK_OEM_7] = L"OEM 7";
 	}
 }
 
@@ -390,6 +409,19 @@ ST_KEY_CODE* CMacroEventMapping::GetKeyCodeByVkCode(int vkCode)
 	}
 
 	return &st_code_data[vkCode];
+}
+
+int CMacroEventMapping::GetVkCodeByKeyCode(unsigned char keyCode)
+{
+	for (int i = 0; i < ARRAYSIZE(st_code_data); i++)
+	{
+		if (st_code_data[i].uc_reportID == 0x01 && st_code_data[i].aucCode[1] == keyCode)
+		{
+			return i;
+		}
+	}
+
+	return 0;
 }
 
 bool CMacroEventMapping::IsSpecialKey(int vkCode)

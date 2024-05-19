@@ -1,16 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<Window caption="0,0,0,20" size="350,110" mininfo="350,110" maxinfo="350,110"> 
+<Window caption="0,0,0,20" size="350,145" mininfo="350,145" maxinfo="350,145"> 
     <Default name="Button" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; normalimage=&quot;file='button2_nr.png' corner='5,5,5,5'&quot; hotimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot; pushedimage=&quot;file='button2_ov.png' corner='5,5,5,5'&quot;" />
+    
+    <Default name="Label" value="textcolor=&quot;#fff0f0f0&quot; font=&quot;1&quot; valign=&quot;center&quot; " />
     
     <VerticalLayout name="root" bkimage="file='Frame_common.bmp' corner='16,33,5,5'">
         <!--标题栏-->
         <HorizontalLayout height="20" inset="7,0,0,0">
-            <Label text="请输入一个按键" textcolor="#fff0f0f0" valign="center" />
+            <Label name="title" text="请输入一个按键" textcolor="#fff0f0f0" valign="center" />
         </HorizontalLayout>
         
         <VerticalLayout inset="10,15,10,15">
-            <!--输入文本内容-->
+            <!--输入按键-->
             <Edit name="keyName" height="25" enabled="false" bordercolor="#ffa8a8a8" textcolor="#ff000000" disabledtextcolor="#ff000000" font="1" bordersize="1" align="center"/>
+            
+            <Control height="10"/>
+            
+            <!--特殊按键组合-->
+            <HorizontalLayout height="25" >
+                <Option name="ctrlOption" padding="0,7,0,0" width="11" height="11" bkimage="file='check_nr.png'" hotimage="file='check_ov.png'" selectedimage="file='check_dn.png'"/>
+                <Control width="5" />
+                <Label text="Ctrl" width="30" />
+                <Control width="15" />
+                
+                <Option name="shiftOption" padding="0,7,0,0" width="11" height="11" bkimage="file='check_nr.png'" hotimage="file='check_ov.png'" selectedimage="file='check_dn.png'"/>
+                <Control width="5" />
+                <Label text="Shift" width="30" />
+                <Control width="15" />
+                
+                <Option name="altOption" padding="0,7,0,0" width="11" height="11" bkimage="file='check_nr.png'" hotimage="file='check_ov.png'" selectedimage="file='check_dn.png'"/>
+                <Control width="5" />
+                <Label text="Alt" width="30" />
+                <Control width="15" />
+                
+                <Option name="winOption" padding="0,7,0,0" width="11" height="11" bkimage="file='check_nr.png'" hotimage="file='check_ov.png'" selectedimage="file='check_dn.png'"/>
+                <Control width="5" />
+                <Label text="Win" width="30" />
+            </HorizontalLayout>
             
             <Control />
             

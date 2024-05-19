@@ -13,8 +13,12 @@ public:
 	UIEND_MSG_MAP
 
 public:
+	void SetTitle(const std::wstring& title) { m_title = title; }
+
+	void SetVkCode(int vkCode) { m_vkCode = vkCode; }
 	int GetVkCode() { return m_vkCode; }
 
+	void SetVkCodeState(unsigned char vkCodeState) { m_vkCodeState = vkCodeState; }
 	unsigned char GetVkCodeState() { return m_vkCodeState; }
 
 	// 获取Ctrl、Shift、Alt按键是否按下的状态
@@ -38,6 +42,8 @@ private:
 	void OnCancel(TNotifyUI& msg);
 
 private:
+	std::wstring m_title;
+
 	int m_vkCode = 0;
 
 	unsigned char m_vkCodeState = 0;

@@ -18,6 +18,7 @@
 #include "GetOptionWindow.h"
 #include "MacroEventMapping.h"
 #include "MacroWindow.h"
+#include "GetVkCodeWindow.h"
 
 // 设置分类
 #define SETTING_CATEGORY_ALL		0		//所有
@@ -322,6 +323,13 @@ void CMainWindow::OnMenuCommand(int commandId)
 		return;
 	}
 
+	// 设置为组合按键，特殊处理
+	if (commandId == ID_KEY_COMBIN)
+	{
+		OnComposeKeyCommand();
+		return;
+	}
+
 	// DPI锁定，弹窗设置DPI值
 	int dpiValue = 200;
 	if (commandId == ID_KEY_DPILOCK)
@@ -405,6 +413,37 @@ void CMainWindow::OnMacroMenuCommand()
 
 	// 发送宏配置给鼠标
 	SetMacroToMouse(keyNum, macroName);
+}
+
+void CMainWindow::OnComposeKeyCommand()
+{
+	// 选择一个组合按键
+	CGetVkCodeWindow getVkCodeWindow;
+	getVkCodeWindow.SetTitle(L"设置组合按键");
+	getVkCodeWindow.Create(GetHWND(), NULL, WS_VISIBLE | WS_POPUP, 0);
+	getVkCodeWindow.CenterWindow();
+	if (getVkCodeWindow.ShowModal() == 0) // 取消
+	{
+		return;
+	}
+
+	CComposeKey composeKey;
+	composeKey.m_vkCode = getVkCodeWindow.GetVkCode();
+	composeKey.m_keyState = getVkCodeWindow.GetVkCodeState();
+
+	// 获取KeyNum
+	int keyNum = GetKeyIndexByCtrlName(m_clickedKeyBtn->GetName().GetData());
+	if (keyNum < 1)
+	{
+		return;
+	}
+
+	// 更改按键名称
+	std::wstring keyName = GetComposeKeyName(composeKey);
+	m_clickedKeyBtn->SetText(keyName.c_str());
+
+	// 发送宏配置给鼠标
+	SetComposeKeyToMouse(keyNum, composeKey);
 }
 
 void CMainWindow::OnClickEvent(TNotifyUI& msg)
@@ -815,6 +854,10 @@ void CMainWindow::UpdateKeyPanel()
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[0];
 	}
+	else if (mouseConfig.m_firstKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[0]);
+	}
 	else
 	{
 		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_firstKey);
@@ -825,6 +868,10 @@ void CMainWindow::UpdateKeyPanel()
 	{
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[1];
+	}
+	else if (mouseConfig.m_secondKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[1]);
 	}
 	else
 	{
@@ -837,6 +884,10 @@ void CMainWindow::UpdateKeyPanel()
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[2];
 	}
+	else if (mouseConfig.m_thirdtKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[2]);
+	}
 	else
 	{
 		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_thirdtKey);
@@ -847,6 +898,10 @@ void CMainWindow::UpdateKeyPanel()
 	{
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[3];
+	}
+	else if (mouseConfig.m_fourthKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[3]);
 	}
 	else
 	{
@@ -859,6 +914,10 @@ void CMainWindow::UpdateKeyPanel()
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[4];
 	}
+	else if (mouseConfig.m_fifthKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[4]);
+	}
 	else
 	{
 		keyName = CKeyMapping::GetKeyNameByKeyIndex(mouseConfig.m_fifthKey);
@@ -869,6 +928,10 @@ void CMainWindow::UpdateKeyPanel()
 	{
 		keyName = KEY_NAME_MACRO;
 		keyName += mouseConfig.m_macroCmdNames[5];
+	}
+	else if (mouseConfig.m_sixthKey == KEY_INDEX_COMBIN)
+	{
+		keyName = GetComposeKeyName(mouseConfig.m_composeKeys[5]);
 	}
 	else
 	{
@@ -1098,6 +1161,82 @@ void CMainWindow::SwitchCurrentDpi(CButtonUI* button)
 
 	// 更新配置给鼠标
 	SetDpiSettingToMouse();
+}
+
+std::wstring CMainWindow::GetComposeKeyName(const CComposeKey& composeKey)
+{
+	unsigned char specialKeyState = composeKey.m_keyState;
+	std::vector<std::wstring> keyNames;
+	if (specialKeyState & 0x01)
+	{
+		keyNames.push_back(L"Ctrl");
+	}
+	if (specialKeyState & 0x02)
+	{
+		keyNames.push_back(L"Shift");
+	}
+	if (specialKeyState & 0x04)
+	{
+		keyNames.push_back(L"Alt");
+	}
+	if (specialKeyState & 0x08)
+	{
+		keyNames.push_back(L"Win");
+	}
+	keyNames.push_back(CMacroEventMapping::GetKeyName(composeKey.m_vkCode));
+
+	std::wstring keyName;
+	for (auto& item : keyNames)
+	{
+		if (!keyName.empty())
+		{
+			keyName += L"+";
+		}
+		keyName += item;
+	}
+
+	return keyName;
+}
+
+CComposeKey CMainWindow::GetComposeKey(const std::wstring& keyName)
+{
+	std::wistringstream iss(keyName.c_str());
+	std::vector<std::wstring> tokens;
+	std::wstring token;
+	std::wstring delimiter = L"+";	
+	while (std::getline(iss, token, delimiter[0])) 
+	{
+		tokens.push_back(token);
+	}
+
+	CComposeKey composeKey;
+	if (tokens.empty())
+	{
+		return composeKey;
+	}
+
+	composeKey.m_vkCode = CMacroEventMapping::GetVkCodeByKeyName(tokens[tokens.size()-1]);
+	for (int i = tokens.size() - 2; i >= 0; i--)
+	{
+		if (tokens[i] == L"Ctrl")
+		{
+			composeKey.m_keyState += 0x01;
+		}
+		else if (tokens[i] == L"Shift")
+		{
+			composeKey.m_keyState += 0x02;
+		}
+		else if (tokens[i] == L"Alt")
+		{
+			composeKey.m_keyState += 0x04;
+		}
+		else if (tokens[i] == L"Win")
+		{
+			composeKey.m_keyState += 0x08;
+		}
+	}
+
+	return composeKey;
 }
 
 void CMainWindow::SetDpiLockToMouse(int keyNum, int dpiValue)
@@ -1357,6 +1496,38 @@ void CMainWindow::SetKeyToMouse(int keyNum, int keyIndex)
 	SendSetting(SETTING_CATEGORY_KEY, package);
 }
 
+void CMainWindow::SetComposeKeyToMouse(int keyNum, CComposeKey composeKey)
+{
+	// 构造Value
+	unsigned char tlvData[6];
+	memset(tlvData, 0, sizeof(tlvData));
+	tlvData[0] = (unsigned char)keyNum;  // key num
+	tlvData[1] = 0x01;  // report id
+	tlvData[2] = composeKey.m_keyState;  // key code1
+	ST_KEY_CODE* keyCode = CMacroEventMapping::GetKeyCodeByVkCode(composeKey.m_vkCode);
+	if (keyCode)
+	{
+		tlvData[3] = keyCode->aucCode[1];  // key code2
+	}
+	tlvData[4] = 0x00;  // disable
+	tlvData[5] = 0x01;  // loop count
+
+	// 构造TLV
+	CProtocalTLV tlv;
+	tlv.m_type = 0x40;
+	tlv.m_length = 0x08;
+	memcpy(tlv.m_value, tlvData, sizeof(tlvData));
+
+	// 构造协议包
+	CProtocalPackage package;
+	package.m_reportId = 0xa5;
+	package.m_commandId = 0xd1;
+	package.m_tlvs.push_back(tlv);
+
+	// 发送协议包
+	SendSetting(SETTING_CATEGORY_KEY, package);
+}
+
 void CMainWindow::SetMacroToMouse(int keyNum, std::wstring macroName)
 {
 	// 获取宏命令详细配置
@@ -1530,6 +1701,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 				mouseConfig.m_firstKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[0] = text.substr(wcslen(KEY_NAME_MACRO));
 			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_firstKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[0] = GetComposeKey(text);
+			}
 		}
 
 		text = m_PaintManager.FindControl(L"secondKeyBtn")->GetText();
@@ -1545,6 +1722,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 			{
 				mouseConfig.m_secondKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[1] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_secondKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[1] = GetComposeKey(text);;
 			}
 		}
 
@@ -1562,6 +1745,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 				mouseConfig.m_thirdtKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[2] = text.substr(wcslen(KEY_NAME_MACRO));
 			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_thirdtKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[2] = GetComposeKey(text);;
+			}
 		}
 
 		text = m_PaintManager.FindControl(L"fouthKeyBtn")->GetText();
@@ -1577,6 +1766,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 			{
 				mouseConfig.m_fourthKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[3] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_fourthKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[3] = GetComposeKey(text);;
 			}
 		}
 
@@ -1594,6 +1789,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 				mouseConfig.m_fifthKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[4] = text.substr(wcslen(KEY_NAME_MACRO));
 			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_fifthKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[4] = GetComposeKey(text);;
+			}
 		}
 
 		text = m_PaintManager.FindControl(L"sixthKeyBtn")->GetText();
@@ -1609,6 +1810,12 @@ void CMainWindow::SaveSetting(int settingCategory)
 			{
 				mouseConfig.m_sixthKey = KEY_INDEX_MACRO;
 				mouseConfig.m_macroCmdNames[5] = text.substr(wcslen(KEY_NAME_MACRO));
+			}
+			else
+			{
+				// 当做组合按键
+				mouseConfig.m_sixthKey = KEY_INDEX_COMBIN;
+				mouseConfig.m_composeKeys[5] = GetComposeKey(text);;
 			}
 		}
 	}
@@ -1803,13 +2010,31 @@ void CMainWindow::RecvMouseSetting(const CProtocalPackage& package)
 				}
 			}
 
-			if (keyIndex == -1)
+			if (keyIndex != -1)
 			{
-				LOG_ERROR(L"not found the key: 0x%02x 0x%02x 0x%02x", keyStruct.m_reportId, keyStruct.m_keyCode1, keyStruct.m_keyCode2);
-				continue;
+				mouseConfig.SetKey(keyNum, keyIndex);
 			}
-
-			mouseConfig.SetKey(keyNum, keyIndex);
+			else
+			{
+				if (keyStruct.m_reportId == 0x01)
+				{
+					// 当做组合按键
+					mouseConfig.SetKey(keyNum, KEY_INDEX_COMBIN);
+					CComposeKey composeKey;
+					composeKey.m_keyState = keyStruct.m_keyCode1;
+					composeKey.m_vkCode = CMacroEventMapping::GetVkCodeByKeyCode(keyStruct.m_keyCode2);
+					if (keyNum >= 1 && keyNum <= ARRAYSIZE(mouseConfig.m_composeKeys))
+					{
+						mouseConfig.m_composeKeys[keyNum - 1] = composeKey;
+					}
+				}
+				else
+				{
+					LOG_ERROR(L"not found the key: 0x%02x 0x%02x 0x%02x", keyStruct.m_reportId, keyStruct.m_keyCode1, keyStruct.m_keyCode2);
+					continue;
+				}
+			}
+			
 			UpdateKeyPanel();
 		}
 		else if (tlv.m_type == 0x41)  // 当前DPI等级

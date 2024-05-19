@@ -20,6 +20,44 @@ void CGetVkCodeWindow::InitWindow()
 	__super::InitWindow();
 	
 	m_PaintManager.AddMessageFilter(this);
+
+	// 设置标题
+	m_PaintManager.FindControl(L"title")->SetText(m_title.c_str());	
+
+	// 设置按键
+	if (m_vkCode != 0)
+	{
+		std::wstring keyName = CMacroEventMapping::GetKeyName(m_vkCode);
+		if (!keyName.empty())
+		{
+			m_PaintManager.FindControl(L"keyName")->SetText(keyName.c_str());
+		}
+	}
+
+	// 设置特殊按键状态
+	if (m_vkCodeState & 0x01)
+	{
+		COptionUI* option = (COptionUI*)m_PaintManager.FindControl(L"ctrlOption");
+		option->Selected(true);
+	}
+
+	if (m_vkCodeState & 0x02)
+	{
+		COptionUI* option = (COptionUI*)m_PaintManager.FindControl(L"shiftOption");
+		option->Selected(true);
+	}
+
+	if (m_vkCodeState & 0x04)
+	{
+		COptionUI* option = (COptionUI*)m_PaintManager.FindControl(L"altOption");
+		option->Selected(true);
+	}
+
+	if (m_vkCodeState & 0x08)
+	{
+		COptionUI* option = (COptionUI*)m_PaintManager.FindControl(L"winOption");
+		option->Selected(true);
+	}
 }
 
 void CGetVkCodeWindow::OnFinalMessage(HWND hWnd)
@@ -95,8 +133,7 @@ void CGetVkCodeWindow::OnKey(bool down, WPARAM wParam, LPARAM lParam)
 	}
 
 	m_PaintManager.FindControl(L"keyName")->SetText(keyName.c_str());
-	m_vkCode = virtualKey;
-	m_vkCodeState = GetSpecialKeyState();
+	m_vkCode = virtualKey;	
 }
 
 void CGetVkCodeWindow::OnOk(TNotifyUI& msg)
@@ -105,6 +142,32 @@ void CGetVkCodeWindow::OnOk(TNotifyUI& msg)
 	{
 		CMyMessageBox::Show(GetHWND(), L"必须输入一个按键");
 		return;
+	}
+
+	// 获取特殊按键配置
+	m_vkCodeState = 0;
+	COptionUI* option = (COptionUI*)m_PaintManager.FindControl(L"ctrlOption");
+	if (option->IsSelected())
+	{
+		m_vkCodeState += 0x01;
+	}
+
+	option = (COptionUI*)m_PaintManager.FindControl(L"shiftOption");
+	if (option->IsSelected())
+	{
+		m_vkCodeState += 0x02;
+	}
+
+	option = (COptionUI*)m_PaintManager.FindControl(L"altOption");
+	if (option->IsSelected())
+	{
+		m_vkCodeState += 0x04;
+	}
+
+	option = (COptionUI*)m_PaintManager.FindControl(L"winOption");
+	if (option->IsSelected())
+	{
+		m_vkCodeState += 0x08;
 	}
 
 	Close(1);
